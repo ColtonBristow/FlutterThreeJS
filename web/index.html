@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <base href="./" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+		<metal http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="icon" href="data:," />
+    <title>Model Viewer</title>
+  </head>
+
+  <body>
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+
+    <script type="module" src="./main.js"></script>
+
+    <script>
+      //======>   EVENTS  <======//
+      window.onObjectLoading = (percentage) => {
+        try {
+          OnObjectLoading.postMessage(`error on loading ${percentage}`);
+        } catch (error) {}
+      };
+
+      window.onLoadError = (error) => {
+        try {
+          OnLoadError.postMessage(`error on load ${error}`);
+        } catch (error) {}
+      };
+      //======>   EVENTS  <======//
+    </script>
+  </body>
+</html>
