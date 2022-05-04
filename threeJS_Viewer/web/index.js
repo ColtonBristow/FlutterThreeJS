@@ -27365,11 +27365,12 @@ const createPerspectiveCamera = (fov2, aspectRatio, near, far) => {
 const createOrbitControls = (c) => {
   if (!camera && !c)
     throw "No camera";
+  controls.autoRotate = true;
   controls = new OrbitControls(c != null ? c : camera, renderer.domElement);
-  controls.enablePan = false;
+  controls.enablePan = true;
   controls.enableRotate = true;
   controls.enableZoom = false;
-  controls.target.set(0.05, 1.24, 0.14);
+  controls.target.set(0, 0, 0);
   controls.update();
   animate();
   window.controls = controls;
@@ -27410,20 +27411,23 @@ const setCameraPosition = (x, y, z) => {
   controls.update();
 };
 const setCameraRotation = (x, y, z) => {
+  camera.autoRotate = true;
+  camera.autoRotateSpeed = 2;
   camera.rotation.set(x, y, z);
   controls.update();
 };
 const loadModel = (modelUrl, playAnimation) => {
   return new Promise((res, rej) => {
     loader = new GLTFLoader();
-    loader.setCrossOrigin("");
-    console.log(loader.crossOrigin);
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath("decoder/");
     dracoLoader.setDecoderConfig({ type: "js" });
     loader.setDRACOLoader(dracoLoader);
-    window.Print.postMessage("trying to load the following: " + modelUrl);
-    //! set cross origin to blank
+    if (debug) {
+      window.Print.postMessage("trying to load the following: " + modelUrl);
+    }
+    //! TODO: add a crossOrigin access point for dart
+    console.log(loader.crossOrigin);
     loader.load(modelUrl, function(gltf) {
       if (playAnimation) {
         mixer = new AnimationMixer(gltf.scene);
@@ -27493,6 +27497,10 @@ const animate = () => {
   if (stats)
     stats.update();
 };
+const tweenCamera = (targetX, targetY, targetZ, duration) => {
+  new TWEEN.Tween(camera.position).to({ x: targetX, y: targetY, z: targetZ }, duration).easing(TWEEN.Easing.Quartic.In).start();
+};
+window.tweenCamera = tweenCamera;
 window.setupScene = setupScene;
 window.setOrbitControls = setOrbitControls;
 window.setControlsTarget = setControlsTarget;

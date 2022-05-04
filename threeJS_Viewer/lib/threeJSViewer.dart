@@ -128,6 +128,10 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
     });
   }
 
+  void tweenCamera(Vector3 vector) {
+    widget.controller?.runJavascript("tweenCamera(${vector.toString()})");
+  }
+
   void _onPageFinishedLoading(_) async {
     await Future.delayed(const Duration(milliseconds: 100));
     await setupScene();
@@ -136,6 +140,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
     loadModels();
     widget.onPageLoaded(
       ThreeJSController(
+        tweenCamera: tweenCamera,
         setBackgroundColor: setBackgroundColor,
         addAmbientLight: addAmbientLight,
         setCameraPosition: setCameraPosition,
@@ -180,6 +185,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
   _initServer() async {
     if (widget.onServerReady != null) widget.onServerReady!(false);
     final server = LocalAssetsServer(
+      port: 4000,
       address: InternetAddress.loopbackIPv4,
       assetsBasePath: 'packages/threeJS_Viewer/web',
       logger: const DebugLogger(),
@@ -197,6 +203,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
 
   @override
   Widget build(BuildContext context) {
+    log('now listening on http://$address:$port');
     return isListening
         ? Stack(
             children: [

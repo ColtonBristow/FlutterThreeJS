@@ -10,8 +10,10 @@ class ThreeJSController {
   Function(Vector3 pos) setControlsTarget;
   Function(OrbitControls orbitControls) setOrbitControls;
   Function(bool enable) setStats;
+  Function(Vector3 vector) tweenCamera;
 
   ThreeJSController({
+    required this.tweenCamera,
     required this.setBackgroundColor,
     required this.addAmbientLight,
     required this.setCameraPosition,
