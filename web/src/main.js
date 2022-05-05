@@ -1,7 +1,8 @@
-import { AnimationMixer, WebGLRenderer, AmbientLight, Scene, PerspectiveCamera, Clock, DirectionalLight, sRGBEncoding, GridHelper, AxesHelper } from "three";
+import { AnimationMixer, WebGLRenderer, AmbientLight, Scene, PerspectiveCamera, Clock, DirectionalLight, sRGBEncoding, GridHelper, AxesHelper, LightShadow } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import addAmbientLight from "./setup_lights";
 import Stats from "three/examples/jsm/libs/stats.module";
 
 let scene, camera, clock, renderer, mixer, controls, loader, stats, debug;
@@ -175,21 +176,21 @@ const loadCam = (modelUrl) => {
   });
 };
 
-const addAmbientLight = (color, intensity) => {
-  const ambient = new AmbientLight(color, intensity);
-  scene.add(ambient);
-};
+// const addAmbientLight = (color, intensity) => {
+//   const ambient = new AmbientLight(color, intensity);
+//   scene.add(ambient);
+// };
 
-const addDirectionalLight = (color, intensity, pos) => {
-  const light2 = new DirectionalLight(color, intensity ?? 0.8 * Math.PI);
-  light2.position.set(pos?.x ?? 0.5, pos?.y ?? 0, pos?.z ?? 0.866);
-  scene.add(light2);
-};
+// const addDirectionalLight = (color, intensity, pos) => {
+//   const light2 = new DirectionalLight(color, intensity ?? 0.8 * Math.PI);
+//   light2.position.set(pos?.x ?? 0.5, pos?.y ?? 0, pos?.z ?? 0.866);
+//   scene.add(light2);
+// };
 
 const setupLights = (type, position, colorRGB, distance, intensity, decay) => {
   switch (type) {
     case "ambientLight":
-
+      addAmbientLight(scene, position, colorRGB, distance, intensity, decay);
     case "directionalLight":
 
     case "hemisphereLight":
@@ -216,8 +217,6 @@ window.loadModel = loadModel;
 window.loadCam = loadCam;
 window.setupLights = setupLights;
 window.addGridHelper = addGridHelper;
-window.addAmbientLight = addAmbientLight;
-window.addDirectionalLight = addDirectionalLight;
 window.setCameraPosition = setCameraPosition;
 window.setCameraRotation = setCameraRotation;
 window.createPerspectiveCamera = createPerspectiveCamera;
