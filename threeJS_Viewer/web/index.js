@@ -2246,11 +2246,11 @@ class Vector3 {
     this.z = iz * qw + iw * -qz + ix * -qy - iy * -qx;
     return this;
   }
-  project(camera) {
-    return this.applyMatrix4(camera.matrixWorldInverse).applyMatrix4(camera.projectionMatrix);
+  project(camera2) {
+    return this.applyMatrix4(camera2.matrixWorldInverse).applyMatrix4(camera2.projectionMatrix);
   }
-  unproject(camera) {
-    return this.applyMatrix4(camera.projectionMatrixInverse).applyMatrix4(camera.matrixWorld);
+  unproject(camera2) {
+    return this.applyMatrix4(camera2.projectionMatrixInverse).applyMatrix4(camera2.matrixWorld);
   }
   transformDirection(m) {
     const x = this.x, y = this.y, z = this.z;
@@ -6997,7 +6997,7 @@ class CubeCamera extends Object3D {
     cameraNZ.lookAt(new Vector3(0, 0, -1));
     this.add(cameraNZ);
   }
-  update(renderer2, scene) {
+  update(renderer2, scene2) {
     if (this.parent === null)
       this.updateMatrixWorld();
     const renderTarget = this.renderTarget;
@@ -7008,18 +7008,18 @@ class CubeCamera extends Object3D {
     const generateMipmaps = renderTarget.texture.generateMipmaps;
     renderTarget.texture.generateMipmaps = false;
     renderer2.setRenderTarget(renderTarget, 0);
-    renderer2.render(scene, cameraPX);
+    renderer2.render(scene2, cameraPX);
     renderer2.setRenderTarget(renderTarget, 1);
-    renderer2.render(scene, cameraNX);
+    renderer2.render(scene2, cameraNX);
     renderer2.setRenderTarget(renderTarget, 2);
-    renderer2.render(scene, cameraPY);
+    renderer2.render(scene2, cameraPY);
     renderer2.setRenderTarget(renderTarget, 3);
-    renderer2.render(scene, cameraNY);
+    renderer2.render(scene2, cameraNY);
     renderer2.setRenderTarget(renderTarget, 4);
-    renderer2.render(scene, cameraPZ);
+    renderer2.render(scene2, cameraPZ);
     renderTarget.texture.generateMipmaps = generateMipmaps;
     renderer2.setRenderTarget(renderTarget, 5);
-    renderer2.render(scene, cameraNZ);
+    renderer2.render(scene2, cameraNZ);
     renderer2.setRenderTarget(currentRenderTarget);
     renderer2.xr.enabled = currentXrEnabled;
   }
@@ -7116,8 +7116,8 @@ class WebGLCubeRenderTarget extends WebGLRenderTarget {
     const currentMinFilter = texture.minFilter;
     if (texture.minFilter === LinearMipmapLinearFilter)
       texture.minFilter = LinearFilter;
-    const camera = new CubeCamera(1, 10, this);
-    camera.update(renderer2, mesh);
+    const camera2 = new CubeCamera(1, 10, this);
+    camera2.update(renderer2, mesh);
     texture.minFilter = currentMinFilter;
     mesh.geometry.dispose();
     mesh.material.dispose();
@@ -8169,9 +8169,9 @@ function WebGLBackground(renderer2, cubemaps, state, objects, premultipliedAlpha
   let currentBackground = null;
   let currentBackgroundVersion = 0;
   let currentTonemapping = null;
-  function render(renderList, scene) {
+  function render(renderList, scene2) {
     let forceClear = false;
-    let background = scene.isScene === true ? scene.background : null;
+    let background = scene2.isScene === true ? scene2.background : null;
     if (background && background.isTexture) {
       background = cubemaps.get(background);
     }
@@ -8203,8 +8203,8 @@ function WebGLBackground(renderer2, cubemaps, state, objects, premultipliedAlpha
         }));
         boxMesh.geometry.deleteAttribute("normal");
         boxMesh.geometry.deleteAttribute("uv");
-        boxMesh.onBeforeRender = function(renderer3, scene2, camera) {
-          this.matrixWorld.copyPosition(camera.matrixWorld);
+        boxMesh.onBeforeRender = function(renderer3, scene3, camera2) {
+          this.matrixWorld.copyPosition(camera2.matrixWorld);
         };
         Object.defineProperty(boxMesh.material, "envMap", {
           get: function() {
@@ -8715,10 +8715,10 @@ function WebGLClipping(properties) {
   this.uniform = uniform;
   this.numPlanes = 0;
   this.numIntersection = 0;
-  this.init = function(planes, enableLocalClipping, camera) {
+  this.init = function(planes, enableLocalClipping, camera2) {
     const enabled = planes.length !== 0 || enableLocalClipping || numGlobalPlanes !== 0 || localClippingEnabled;
     localClippingEnabled = enableLocalClipping;
-    globalState = projectPlanes(planes, camera, 0);
+    globalState = projectPlanes(planes, camera2, 0);
     numGlobalPlanes = planes.length;
     return enabled;
   };
@@ -8730,7 +8730,7 @@ function WebGLClipping(properties) {
     renderingShadows = false;
     resetGlobalState();
   };
-  this.setState = function(material, camera, useCache) {
+  this.setState = function(material, camera2, useCache) {
     const planes = material.clippingPlanes, clipIntersection = material.clipIntersection, clipShadows = material.clipShadows;
     const materialProperties = properties.get(material);
     if (!localClippingEnabled || planes === null || planes.length === 0 || renderingShadows && !clipShadows) {
@@ -8743,7 +8743,7 @@ function WebGLClipping(properties) {
       const nGlobal = renderingShadows ? 0 : numGlobalPlanes, lGlobal = nGlobal * 4;
       let dstArray = materialProperties.clippingState || null;
       uniform.value = dstArray;
-      dstArray = projectPlanes(planes, camera, lGlobal, useCache);
+      dstArray = projectPlanes(planes, camera2, lGlobal, useCache);
       for (let i = 0; i !== lGlobal; ++i) {
         dstArray[i] = globalState[i];
       }
@@ -8760,13 +8760,13 @@ function WebGLClipping(properties) {
     scope.numPlanes = numGlobalPlanes;
     scope.numIntersection = 0;
   }
-  function projectPlanes(planes, camera, dstOffset, skipTransform) {
+  function projectPlanes(planes, camera2, dstOffset, skipTransform) {
     const nPlanes = planes !== null ? planes.length : 0;
     let dstArray = null;
     if (nPlanes !== 0) {
       dstArray = uniform.value;
       if (skipTransform !== true || dstArray === null) {
-        const flatSize = dstOffset + nPlanes * 4, viewMatrix = camera.matrixWorldInverse;
+        const flatSize = dstOffset + nPlanes * 4, viewMatrix = camera2.matrixWorldInverse;
         viewNormalMatrix.getNormalMatrix(viewMatrix);
         if (dstArray === null || dstArray.length < flatSize) {
           dstArray = new Float32Array(flatSize);
@@ -8974,10 +8974,10 @@ class PMREMGenerator {
     this._cubemapShader = null;
     this._compileMaterial(this._blurMaterial);
   }
-  fromScene(scene, sigma = 0, near = 0.1, far = 100) {
+  fromScene(scene2, sigma = 0, near = 0.1, far = 100) {
     _oldTarget = this._renderer.getRenderTarget();
     const cubeUVRenderTarget = this._allocateTargets();
-    this._sceneToCubeUV(scene, near, far, cubeUVRenderTarget);
+    this._sceneToCubeUV(scene2, near, far, cubeUVRenderTarget);
     if (sigma > 0) {
       this._blur(cubeUVRenderTarget, 0, 0, sigma);
     }
@@ -9046,7 +9046,7 @@ class PMREMGenerator {
     const tmpMesh = new Mesh(_lodPlanes[0], material);
     this._renderer.compile(tmpMesh, _flatCamera);
   }
-  _sceneToCubeUV(scene, near, far, cubeUVRenderTarget) {
+  _sceneToCubeUV(scene2, near, far, cubeUVRenderTarget) {
     const fov2 = 90;
     const aspect2 = 1;
     const cubeCamera = new PerspectiveCamera(fov2, aspect2, near, far);
@@ -9068,11 +9068,11 @@ class PMREMGenerator {
     });
     const backgroundBox = new Mesh(new BoxGeometry(), backgroundMaterial);
     let useSolidColor = false;
-    const background = scene.background;
+    const background = scene2.background;
     if (background) {
       if (background.isColor) {
         backgroundMaterial.color.copy(background);
-        scene.background = null;
+        scene2.background = null;
         useSolidColor = true;
       }
     } else {
@@ -9096,14 +9096,14 @@ class PMREMGenerator {
       if (useSolidColor) {
         renderer2.render(backgroundBox, cubeCamera);
       }
-      renderer2.render(scene, cubeCamera);
+      renderer2.render(scene2, cubeCamera);
     }
     backgroundBox.geometry.dispose();
     backgroundBox.material.dispose();
     renderer2.toneMapping = toneMapping;
     renderer2.outputEncoding = outputEncoding;
     renderer2.autoClear = originalAutoClear;
-    scene.background = background;
+    scene2.background = background;
   }
   _setEncoding(uniform, texture) {
     uniform.value = ENCODINGS[texture.encoding];
@@ -11338,9 +11338,9 @@ function WebGLPrograms(renderer2, cubemaps, cubeuvmaps, extensions, capabilities
     }
     return encoding;
   }
-  function getParameters(material, lights, shadows, scene, object) {
-    const fog = scene.fog;
-    const environment = material.isMeshStandardMaterial ? scene.environment : null;
+  function getParameters(material, lights, shadows, scene2, object) {
+    const fog = scene2.fog;
+    const environment = material.isMeshStandardMaterial ? scene2.environment : null;
     const envMap = (material.isMeshStandardMaterial ? cubeuvmaps : cubemaps).get(material.envMap || environment);
     const shaderID = shaderIDs[material.type];
     const maxBones = object.isSkinnedMesh ? getMaxBones(object) : 0;
@@ -11681,17 +11681,17 @@ function WebGLRenderList(properties) {
 }
 function WebGLRenderLists(properties) {
   let lists = /* @__PURE__ */ new WeakMap();
-  function get(scene, renderCallDepth) {
+  function get(scene2, renderCallDepth) {
     let list;
-    if (lists.has(scene) === false) {
+    if (lists.has(scene2) === false) {
       list = new WebGLRenderList(properties);
-      lists.set(scene, [list]);
+      lists.set(scene2, [list]);
     } else {
-      if (renderCallDepth >= lists.get(scene).length) {
+      if (renderCallDepth >= lists.get(scene2).length) {
         list = new WebGLRenderList(properties);
-        lists.get(scene).push(list);
+        lists.get(scene2).push(list);
       } else {
-        list = lists.get(scene)[renderCallDepth];
+        list = lists.get(scene2)[renderCallDepth];
       }
     }
     return list;
@@ -11992,13 +11992,13 @@ function WebGLLights(extensions, capabilities) {
       state.version = nextVersion++;
     }
   }
-  function setupView(lights, camera) {
+  function setupView(lights, camera2) {
     let directionalLength = 0;
     let pointLength = 0;
     let spotLength = 0;
     let rectAreaLength = 0;
     let hemiLength = 0;
-    const viewMatrix = camera.matrixWorldInverse;
+    const viewMatrix = camera2.matrixWorldInverse;
     for (let i = 0, l = lights.length; i < l; i++) {
       const light = lights[i];
       if (light.isDirectionalLight) {
@@ -12067,8 +12067,8 @@ function WebGLRenderState(extensions, capabilities) {
   function setupLights(physicallyCorrectLights) {
     lights.setup(lightsArray, physicallyCorrectLights);
   }
-  function setupLightsView(camera) {
-    lights.setupView(lightsArray, camera);
+  function setupLightsView(camera2) {
+    lights.setupView(lightsArray, camera2);
   }
   const state = {
     lightsArray,
@@ -12086,17 +12086,17 @@ function WebGLRenderState(extensions, capabilities) {
 }
 function WebGLRenderStates(extensions, capabilities) {
   let renderStates = /* @__PURE__ */ new WeakMap();
-  function get(scene, renderCallDepth = 0) {
+  function get(scene2, renderCallDepth = 0) {
     let renderState;
-    if (renderStates.has(scene) === false) {
+    if (renderStates.has(scene2) === false) {
       renderState = new WebGLRenderState(extensions, capabilities);
-      renderStates.set(scene, [renderState]);
+      renderStates.set(scene2, [renderState]);
     } else {
-      if (renderCallDepth >= renderStates.get(scene).length) {
+      if (renderCallDepth >= renderStates.get(scene2).length) {
         renderState = new WebGLRenderState(extensions, capabilities);
-        renderStates.get(scene).push(renderState);
+        renderStates.get(scene2).push(renderState);
       } else {
-        renderState = renderStates.get(scene)[renderCallDepth];
+        renderState = renderStates.get(scene2)[renderCallDepth];
       }
     }
     return renderState;
@@ -12195,7 +12195,7 @@ function WebGLShadowMap(_renderer, _objects, _capabilities) {
   this.autoUpdate = true;
   this.needsUpdate = false;
   this.type = PCFShadowMap;
-  this.render = function(lights, scene, camera) {
+  this.render = function(lights, scene2, camera2) {
     if (scope.enabled === false)
       return;
     if (scope.autoUpdate === false && scope.needsUpdate === false)
@@ -12257,17 +12257,17 @@ function WebGLShadowMap(_renderer, _objects, _capabilities) {
         _state.viewport(_viewport);
         shadow.updateMatrices(light, vp);
         _frustum = shadow.getFrustum();
-        renderObject(scene, camera, shadow.camera, light, this.type);
+        renderObject(scene2, camera2, shadow.camera, light, this.type);
       }
       if (!shadow.isPointLightShadow && this.type === VSMShadowMap) {
-        VSMPass(shadow, camera);
+        VSMPass(shadow, camera2);
       }
       shadow.needsUpdate = false;
     }
     scope.needsUpdate = false;
     _renderer.setRenderTarget(currentRenderTarget, activeCubeFace, activeMipmapLevel);
   };
-  function VSMPass(shadow, camera) {
+  function VSMPass(shadow, camera2) {
     const geometry = _objects.update(fullScreenMesh);
     if (shadowMaterialVertical.defines.VSM_SAMPLES !== shadow.blurSamples) {
       shadowMaterialVertical.defines.VSM_SAMPLES = shadow.blurSamples;
@@ -12280,13 +12280,13 @@ function WebGLShadowMap(_renderer, _objects, _capabilities) {
     shadowMaterialVertical.uniforms.radius.value = shadow.radius;
     _renderer.setRenderTarget(shadow.mapPass);
     _renderer.clear();
-    _renderer.renderBufferDirect(camera, null, geometry, shadowMaterialVertical, fullScreenMesh, null);
+    _renderer.renderBufferDirect(camera2, null, geometry, shadowMaterialVertical, fullScreenMesh, null);
     shadowMaterialHorizontal.uniforms.shadow_pass.value = shadow.mapPass.texture;
     shadowMaterialHorizontal.uniforms.resolution.value = shadow.mapSize;
     shadowMaterialHorizontal.uniforms.radius.value = shadow.radius;
     _renderer.setRenderTarget(shadow.map);
     _renderer.clear();
-    _renderer.renderBufferDirect(camera, null, geometry, shadowMaterialHorizontal, fullScreenMesh, null);
+    _renderer.renderBufferDirect(camera2, null, geometry, shadowMaterialHorizontal, fullScreenMesh, null);
   }
   function getDepthMaterial(object, geometry, material, light, shadowCameraNear, shadowCameraFar, type) {
     let result = null;
@@ -12334,10 +12334,10 @@ function WebGLShadowMap(_renderer, _objects, _capabilities) {
     }
     return result;
   }
-  function renderObject(object, camera, shadowCamera, light, type) {
+  function renderObject(object, camera2, shadowCamera, light, type) {
     if (object.visible === false)
       return;
-    const visible = object.layers.test(camera.layers);
+    const visible = object.layers.test(camera2.layers);
     if (visible && (object.isMesh || object.isLine || object.isPoints)) {
       if ((object.castShadow || object.receiveShadow && type === VSMShadowMap) && (!object.frustumCulled || _frustum.intersectsObject(object))) {
         object.modelViewMatrix.multiplyMatrices(shadowCamera.matrixWorldInverse, object.matrixWorld);
@@ -12361,7 +12361,7 @@ function WebGLShadowMap(_renderer, _objects, _capabilities) {
     }
     const children = object.children;
     for (let i = 0, l = children.length; i < l; i++) {
-      renderObject(children[i], camera, shadowCamera, light, type);
+      renderObject(children[i], camera2, shadowCamera, light, type);
     }
   }
 }
@@ -14330,7 +14330,7 @@ class WebXRManager extends EventDispatcher {
     }
     const cameraLPos = new Vector3();
     const cameraRPos = new Vector3();
-    function setProjectionFromUnion(camera, cameraL2, cameraR2) {
+    function setProjectionFromUnion(camera2, cameraL2, cameraR2) {
       cameraLPos.setFromMatrixPosition(cameraL2.matrixWorld);
       cameraRPos.setFromMatrixPosition(cameraR2.matrixWorld);
       const ipd = cameraLPos.distanceTo(cameraRPos);
@@ -14346,32 +14346,32 @@ class WebXRManager extends EventDispatcher {
       const right = near * rightFov;
       const zOffset = ipd / (-leftFov + rightFov);
       const xOffset = zOffset * -leftFov;
-      cameraL2.matrixWorld.decompose(camera.position, camera.quaternion, camera.scale);
-      camera.translateX(xOffset);
-      camera.translateZ(zOffset);
-      camera.matrixWorld.compose(camera.position, camera.quaternion, camera.scale);
-      camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
+      cameraL2.matrixWorld.decompose(camera2.position, camera2.quaternion, camera2.scale);
+      camera2.translateX(xOffset);
+      camera2.translateZ(zOffset);
+      camera2.matrixWorld.compose(camera2.position, camera2.quaternion, camera2.scale);
+      camera2.matrixWorldInverse.copy(camera2.matrixWorld).invert();
       const near2 = near + zOffset;
       const far2 = far + zOffset;
       const left2 = left - xOffset;
       const right2 = right + (ipd - xOffset);
       const top2 = topFov * far / far2 * near2;
       const bottom2 = bottomFov * far / far2 * near2;
-      camera.projectionMatrix.makePerspective(left2, right2, top2, bottom2, near2, far2);
+      camera2.projectionMatrix.makePerspective(left2, right2, top2, bottom2, near2, far2);
     }
-    function updateCamera(camera, parent) {
+    function updateCamera(camera2, parent) {
       if (parent === null) {
-        camera.matrixWorld.copy(camera.matrix);
+        camera2.matrixWorld.copy(camera2.matrix);
       } else {
-        camera.matrixWorld.multiplyMatrices(parent.matrixWorld, camera.matrix);
+        camera2.matrixWorld.multiplyMatrices(parent.matrixWorld, camera2.matrix);
       }
-      camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
+      camera2.matrixWorldInverse.copy(camera2.matrixWorld).invert();
     }
-    this.updateCamera = function(camera) {
+    this.updateCamera = function(camera2) {
       if (session === null)
         return;
-      cameraVR.near = cameraR.near = cameraL.near = camera.near;
-      cameraVR.far = cameraR.far = cameraL.far = camera.far;
+      cameraVR.near = cameraR.near = cameraL.near = camera2.near;
+      cameraVR.far = cameraR.far = cameraL.far = camera2.far;
       if (_currentDepthNear !== cameraVR.near || _currentDepthFar !== cameraVR.far) {
         session.updateRenderState({
           depthNear: cameraVR.near,
@@ -14380,19 +14380,19 @@ class WebXRManager extends EventDispatcher {
         _currentDepthNear = cameraVR.near;
         _currentDepthFar = cameraVR.far;
       }
-      const parent = camera.parent;
+      const parent = camera2.parent;
       const cameras2 = cameraVR.cameras;
       updateCamera(cameraVR, parent);
       for (let i = 0; i < cameras2.length; i++) {
         updateCamera(cameras2[i], parent);
       }
       cameraVR.matrixWorld.decompose(cameraVR.position, cameraVR.quaternion, cameraVR.scale);
-      camera.position.copy(cameraVR.position);
-      camera.quaternion.copy(cameraVR.quaternion);
-      camera.scale.copy(cameraVR.scale);
-      camera.matrix.copy(cameraVR.matrix);
-      camera.matrixWorld.copy(cameraVR.matrixWorld);
-      const children = camera.children;
+      camera2.position.copy(cameraVR.position);
+      camera2.quaternion.copy(cameraVR.quaternion);
+      camera2.scale.copy(cameraVR.scale);
+      camera2.matrix.copy(cameraVR.matrix);
+      camera2.matrixWorld.copy(cameraVR.matrixWorld);
+      const children = camera2.children;
       for (let i = 0, l = children.length; i < l; i++) {
         children[i].updateMatrixWorld(true);
       }
@@ -14450,15 +14450,15 @@ class WebXRManager extends EventDispatcher {
               renderer2.setRenderTarget(newRenderTarget);
             }
           }
-          const camera = cameras[i];
-          camera.matrix.fromArray(view.transform.matrix);
-          camera.projectionMatrix.fromArray(view.projectionMatrix);
-          camera.viewport.set(viewport.x, viewport.y, viewport.width, viewport.height);
+          const camera2 = cameras[i];
+          camera2.matrix.fromArray(view.transform.matrix);
+          camera2.projectionMatrix.fromArray(view.projectionMatrix);
+          camera2.viewport.set(viewport.x, viewport.y, viewport.width, viewport.height);
           if (i === 0) {
-            cameraVR.matrix.copy(camera.matrix);
+            cameraVR.matrix.copy(camera2.matrix);
           }
           if (cameraVRNeedsUpdate === true) {
-            cameraVR.cameras.push(camera);
+            cameraVR.cameras.push(camera2);
           }
         }
       }
@@ -15228,11 +15228,11 @@ function WebGLRenderer(parameters = {}) {
       });
     }
   }
-  this.renderBufferDirect = function(camera, scene, geometry, material, object, group) {
-    if (scene === null)
-      scene = _emptyScene;
+  this.renderBufferDirect = function(camera2, scene2, geometry, material, object, group) {
+    if (scene2 === null)
+      scene2 = _emptyScene;
     const frontFaceCW = object.isMesh && object.matrixWorld.determinant() < 0;
-    const program = setProgram(camera, scene, geometry, material, object);
+    const program = setProgram(camera2, scene2, geometry, material, object);
     state.setMaterial(material, frontFaceCW);
     let index = geometry.index;
     const position = geometry.attributes.position;
@@ -15298,12 +15298,12 @@ function WebGLRenderer(parameters = {}) {
       renderer2.render(drawStart, drawCount);
     }
   };
-  this.compile = function(scene, camera) {
-    currentRenderState = renderStates.get(scene);
+  this.compile = function(scene2, camera2) {
+    currentRenderState = renderStates.get(scene2);
     currentRenderState.init();
     renderStateStack.push(currentRenderState);
-    scene.traverseVisible(function(object) {
-      if (object.isLight && object.layers.test(camera.layers)) {
+    scene2.traverseVisible(function(object) {
+      if (object.isLight && object.layers.test(camera2.layers)) {
         currentRenderState.pushLight(object);
         if (object.castShadow) {
           currentRenderState.pushShadow(object);
@@ -15311,16 +15311,16 @@ function WebGLRenderer(parameters = {}) {
       }
     });
     currentRenderState.setupLights(_this.physicallyCorrectLights);
-    scene.traverse(function(object) {
+    scene2.traverse(function(object) {
       const material = object.material;
       if (material) {
         if (Array.isArray(material)) {
           for (let i = 0; i < material.length; i++) {
             const material2 = material[i];
-            getProgram(material2, scene, object);
+            getProgram(material2, scene2, object);
           }
         } else {
-          getProgram(material, scene, object);
+          getProgram(material, scene2, object);
         }
       }
     });
@@ -15349,35 +15349,35 @@ function WebGLRenderer(parameters = {}) {
   };
   xr.addEventListener("sessionstart", onXRSessionStart);
   xr.addEventListener("sessionend", onXRSessionEnd);
-  this.render = function(scene, camera) {
-    if (camera !== void 0 && camera.isCamera !== true) {
+  this.render = function(scene2, camera2) {
+    if (camera2 !== void 0 && camera2.isCamera !== true) {
       console.error("THREE.WebGLRenderer.render: camera is not an instance of THREE.Camera.");
       return;
     }
     if (_isContextLost === true)
       return;
-    if (scene.autoUpdate === true)
-      scene.updateMatrixWorld();
-    if (camera.parent === null)
-      camera.updateMatrixWorld();
+    if (scene2.autoUpdate === true)
+      scene2.updateMatrixWorld();
+    if (camera2.parent === null)
+      camera2.updateMatrixWorld();
     if (xr.enabled === true && xr.isPresenting === true) {
       if (xr.cameraAutoUpdate === true)
-        xr.updateCamera(camera);
-      camera = xr.getCamera();
+        xr.updateCamera(camera2);
+      camera2 = xr.getCamera();
     }
-    if (scene.isScene === true)
-      scene.onBeforeRender(_this, scene, camera, _currentRenderTarget);
-    currentRenderState = renderStates.get(scene, renderStateStack.length);
+    if (scene2.isScene === true)
+      scene2.onBeforeRender(_this, scene2, camera2, _currentRenderTarget);
+    currentRenderState = renderStates.get(scene2, renderStateStack.length);
     currentRenderState.init();
     renderStateStack.push(currentRenderState);
-    _projScreenMatrix2.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+    _projScreenMatrix2.multiplyMatrices(camera2.projectionMatrix, camera2.matrixWorldInverse);
     _frustum.setFromProjectionMatrix(_projScreenMatrix2);
     _localClippingEnabled = this.localClippingEnabled;
-    _clippingEnabled = clipping.init(this.clippingPlanes, _localClippingEnabled, camera);
-    currentRenderList = renderLists.get(scene, renderListStack.length);
+    _clippingEnabled = clipping.init(this.clippingPlanes, _localClippingEnabled, camera2);
+    currentRenderList = renderLists.get(scene2, renderListStack.length);
     currentRenderList.init();
     renderListStack.push(currentRenderList);
-    projectObject(scene, camera, 0, _this.sortObjects);
+    projectObject(scene2, camera2, 0, _this.sortObjects);
     currentRenderList.finish();
     if (_this.sortObjects === true) {
       currentRenderList.sort(_opaqueSort, _transparentSort);
@@ -15385,28 +15385,28 @@ function WebGLRenderer(parameters = {}) {
     if (_clippingEnabled === true)
       clipping.beginShadows();
     const shadowsArray = currentRenderState.state.shadowsArray;
-    shadowMap.render(shadowsArray, scene, camera);
+    shadowMap.render(shadowsArray, scene2, camera2);
     if (_clippingEnabled === true)
       clipping.endShadows();
     if (this.info.autoReset === true)
       this.info.reset();
-    background.render(currentRenderList, scene);
+    background.render(currentRenderList, scene2);
     currentRenderState.setupLights(_this.physicallyCorrectLights);
-    if (camera.isArrayCamera) {
-      const cameras = camera.cameras;
+    if (camera2.isArrayCamera) {
+      const cameras = camera2.cameras;
       for (let i = 0, l = cameras.length; i < l; i++) {
-        const camera2 = cameras[i];
-        renderScene(currentRenderList, scene, camera2, camera2.viewport);
+        const camera22 = cameras[i];
+        renderScene(currentRenderList, scene2, camera22, camera22.viewport);
       }
     } else {
-      renderScene(currentRenderList, scene, camera);
+      renderScene(currentRenderList, scene2, camera2);
     }
     if (_currentRenderTarget !== null) {
       textures.updateMultisampleRenderTarget(_currentRenderTarget);
       textures.updateRenderTargetMipmap(_currentRenderTarget);
     }
-    if (scene.isScene === true)
-      scene.onAfterRender(_this, scene, camera);
+    if (scene2.isScene === true)
+      scene2.onAfterRender(_this, scene2, camera2);
     state.buffers.depth.setTest(true);
     state.buffers.depth.setMask(true);
     state.buffers.color.setMask(true);
@@ -15427,16 +15427,16 @@ function WebGLRenderer(parameters = {}) {
       currentRenderList = null;
     }
   };
-  function projectObject(object, camera, groupOrder, sortObjects) {
+  function projectObject(object, camera2, groupOrder, sortObjects) {
     if (object.visible === false)
       return;
-    const visible = object.layers.test(camera.layers);
+    const visible = object.layers.test(camera2.layers);
     if (visible) {
       if (object.isGroup) {
         groupOrder = object.renderOrder;
       } else if (object.isLOD) {
         if (object.autoUpdate === true)
-          object.update(camera);
+          object.update(camera2);
       } else if (object.isLight) {
         currentRenderState.pushLight(object);
         if (object.castShadow) {
@@ -15483,26 +15483,26 @@ function WebGLRenderer(parameters = {}) {
     }
     const children = object.children;
     for (let i = 0, l = children.length; i < l; i++) {
-      projectObject(children[i], camera, groupOrder, sortObjects);
+      projectObject(children[i], camera2, groupOrder, sortObjects);
     }
   }
-  function renderScene(currentRenderList2, scene, camera, viewport) {
+  function renderScene(currentRenderList2, scene2, camera2, viewport) {
     const opaqueObjects = currentRenderList2.opaque;
     const transmissiveObjects = currentRenderList2.transmissive;
     const transparentObjects = currentRenderList2.transparent;
-    currentRenderState.setupLightsView(camera);
+    currentRenderState.setupLightsView(camera2);
     if (transmissiveObjects.length > 0)
-      renderTransmissionPass(opaqueObjects, scene, camera);
+      renderTransmissionPass(opaqueObjects, scene2, camera2);
     if (viewport)
       state.viewport(_currentViewport.copy(viewport));
     if (opaqueObjects.length > 0)
-      renderObjects(opaqueObjects, scene, camera);
+      renderObjects(opaqueObjects, scene2, camera2);
     if (transmissiveObjects.length > 0)
-      renderObjects(transmissiveObjects, scene, camera);
+      renderObjects(transmissiveObjects, scene2, camera2);
     if (transparentObjects.length > 0)
-      renderObjects(transparentObjects, scene, camera);
+      renderObjects(transparentObjects, scene2, camera2);
   }
-  function renderTransmissionPass(opaqueObjects, scene, camera) {
+  function renderTransmissionPass(opaqueObjects, scene2, camera2) {
     if (_transmissionRenderTarget === null) {
       const needsAntialias = _antialias === true && capabilities.isWebGL2 === true;
       const renderTargetType = needsAntialias ? WebGLMultisampleRenderTarget : WebGLRenderTarget;
@@ -15521,55 +15521,55 @@ function WebGLRenderer(parameters = {}) {
     _this.clear();
     const currentToneMapping = _this.toneMapping;
     _this.toneMapping = NoToneMapping;
-    renderObjects(opaqueObjects, scene, camera);
+    renderObjects(opaqueObjects, scene2, camera2);
     _this.toneMapping = currentToneMapping;
     textures.updateMultisampleRenderTarget(_transmissionRenderTarget);
     textures.updateRenderTargetMipmap(_transmissionRenderTarget);
     _this.setRenderTarget(currentRenderTarget);
   }
-  function renderObjects(renderList, scene, camera) {
-    const overrideMaterial = scene.isScene === true ? scene.overrideMaterial : null;
+  function renderObjects(renderList, scene2, camera2) {
+    const overrideMaterial = scene2.isScene === true ? scene2.overrideMaterial : null;
     for (let i = 0, l = renderList.length; i < l; i++) {
       const renderItem = renderList[i];
       const object = renderItem.object;
       const geometry = renderItem.geometry;
       const material = overrideMaterial === null ? renderItem.material : overrideMaterial;
       const group = renderItem.group;
-      if (object.layers.test(camera.layers)) {
-        renderObject(object, scene, camera, geometry, material, group);
+      if (object.layers.test(camera2.layers)) {
+        renderObject(object, scene2, camera2, geometry, material, group);
       }
     }
   }
-  function renderObject(object, scene, camera, geometry, material, group) {
-    object.onBeforeRender(_this, scene, camera, geometry, material, group);
-    object.modelViewMatrix.multiplyMatrices(camera.matrixWorldInverse, object.matrixWorld);
+  function renderObject(object, scene2, camera2, geometry, material, group) {
+    object.onBeforeRender(_this, scene2, camera2, geometry, material, group);
+    object.modelViewMatrix.multiplyMatrices(camera2.matrixWorldInverse, object.matrixWorld);
     object.normalMatrix.getNormalMatrix(object.modelViewMatrix);
-    material.onBeforeRender(_this, scene, camera, geometry, object, group);
+    material.onBeforeRender(_this, scene2, camera2, geometry, object, group);
     if (material.transparent === true && material.side === DoubleSide) {
       material.side = BackSide;
       material.needsUpdate = true;
-      _this.renderBufferDirect(camera, scene, geometry, material, object, group);
+      _this.renderBufferDirect(camera2, scene2, geometry, material, object, group);
       material.side = FrontSide;
       material.needsUpdate = true;
-      _this.renderBufferDirect(camera, scene, geometry, material, object, group);
+      _this.renderBufferDirect(camera2, scene2, geometry, material, object, group);
       material.side = DoubleSide;
     } else {
-      _this.renderBufferDirect(camera, scene, geometry, material, object, group);
+      _this.renderBufferDirect(camera2, scene2, geometry, material, object, group);
     }
-    object.onAfterRender(_this, scene, camera, geometry, material, group);
+    object.onAfterRender(_this, scene2, camera2, geometry, material, group);
   }
-  function getProgram(material, scene, object) {
-    if (scene.isScene !== true)
-      scene = _emptyScene;
+  function getProgram(material, scene2, object) {
+    if (scene2.isScene !== true)
+      scene2 = _emptyScene;
     const materialProperties = properties.get(material);
     const lights = currentRenderState.state.lights;
     const shadowsArray = currentRenderState.state.shadowsArray;
     const lightsStateVersion = lights.state.version;
-    const parameters2 = programCache.getParameters(material, lights.state, shadowsArray, scene, object);
+    const parameters2 = programCache.getParameters(material, lights.state, shadowsArray, scene2, object);
     const programCacheKey = programCache.getProgramCacheKey(parameters2);
     let programs = materialProperties.programs;
-    materialProperties.environment = material.isMeshStandardMaterial ? scene.environment : null;
-    materialProperties.fog = scene.fog;
+    materialProperties.environment = material.isMeshStandardMaterial ? scene2.environment : null;
+    materialProperties.fog = scene2.fog;
     materialProperties.envMap = (material.isMeshStandardMaterial ? cubeuvmaps : cubemaps).get(material.envMap || materialProperties.environment);
     if (programs === void 0) {
       material.addEventListener("dispose", onMaterialDispose);
@@ -15636,12 +15636,12 @@ function WebGLRenderer(parameters = {}) {
     materialProperties.vertexAlphas = parameters2.vertexAlphas;
     materialProperties.vertexTangents = parameters2.vertexTangents;
   }
-  function setProgram(camera, scene, geometry, material, object) {
-    if (scene.isScene !== true)
-      scene = _emptyScene;
+  function setProgram(camera2, scene2, geometry, material, object) {
+    if (scene2.isScene !== true)
+      scene2 = _emptyScene;
     textures.resetTextureUnits();
-    const fog = scene.fog;
-    const environment = material.isMeshStandardMaterial ? scene.environment : null;
+    const fog = scene2.fog;
+    const environment = material.isMeshStandardMaterial ? scene2.environment : null;
     const encoding = _currentRenderTarget === null ? _this.outputEncoding : _currentRenderTarget.texture.encoding;
     const envMap = (material.isMeshStandardMaterial ? cubeuvmaps : cubemaps).get(material.envMap || environment);
     const vertexAlphas = material.vertexColors === true && !!geometry.attributes.color && geometry.attributes.color.itemSize === 4;
@@ -15652,9 +15652,9 @@ function WebGLRenderer(parameters = {}) {
     const materialProperties = properties.get(material);
     const lights = currentRenderState.state.lights;
     if (_clippingEnabled === true) {
-      if (_localClippingEnabled === true || camera !== _currentCamera) {
-        const useCache = camera === _currentCamera && material.id === _currentMaterialId;
-        clipping.setState(material, camera, useCache);
+      if (_localClippingEnabled === true || camera2 !== _currentCamera) {
+        const useCache = camera2 === _currentCamera && material.id === _currentMaterialId;
+        clipping.setState(material, camera2, useCache);
       }
     }
     let needsProgramChange = false;
@@ -15694,7 +15694,7 @@ function WebGLRenderer(parameters = {}) {
     }
     let program = materialProperties.currentProgram;
     if (needsProgramChange === true) {
-      program = getProgram(material, scene, object);
+      program = getProgram(material, scene2, object);
     }
     let refreshProgram = false;
     let refreshMaterial = false;
@@ -15709,27 +15709,27 @@ function WebGLRenderer(parameters = {}) {
       _currentMaterialId = material.id;
       refreshMaterial = true;
     }
-    if (refreshProgram || _currentCamera !== camera) {
-      p_uniforms.setValue(_gl, "projectionMatrix", camera.projectionMatrix);
+    if (refreshProgram || _currentCamera !== camera2) {
+      p_uniforms.setValue(_gl, "projectionMatrix", camera2.projectionMatrix);
       if (capabilities.logarithmicDepthBuffer) {
-        p_uniforms.setValue(_gl, "logDepthBufFC", 2 / (Math.log(camera.far + 1) / Math.LN2));
+        p_uniforms.setValue(_gl, "logDepthBufFC", 2 / (Math.log(camera2.far + 1) / Math.LN2));
       }
-      if (_currentCamera !== camera) {
-        _currentCamera = camera;
+      if (_currentCamera !== camera2) {
+        _currentCamera = camera2;
         refreshMaterial = true;
         refreshLights = true;
       }
       if (material.isShaderMaterial || material.isMeshPhongMaterial || material.isMeshToonMaterial || material.isMeshStandardMaterial || material.envMap) {
         const uCamPos = p_uniforms.map.cameraPosition;
         if (uCamPos !== void 0) {
-          uCamPos.setValue(_gl, _vector3.setFromMatrixPosition(camera.matrixWorld));
+          uCamPos.setValue(_gl, _vector3.setFromMatrixPosition(camera2.matrixWorld));
         }
       }
       if (material.isMeshPhongMaterial || material.isMeshToonMaterial || material.isMeshLambertMaterial || material.isMeshBasicMaterial || material.isMeshStandardMaterial || material.isShaderMaterial) {
-        p_uniforms.setValue(_gl, "isOrthographic", camera.isOrthographicCamera === true);
+        p_uniforms.setValue(_gl, "isOrthographic", camera2.isOrthographicCamera === true);
       }
       if (material.isMeshPhongMaterial || material.isMeshToonMaterial || material.isMeshLambertMaterial || material.isMeshBasicMaterial || material.isMeshStandardMaterial || material.isShaderMaterial || material.isShadowMaterial || object.isSkinnedMesh) {
-        p_uniforms.setValue(_gl, "viewMatrix", camera.matrixWorldInverse);
+        p_uniforms.setValue(_gl, "viewMatrix", camera2.matrixWorldInverse);
       }
     }
     if (object.isSkinnedMesh) {
@@ -20505,8 +20505,8 @@ class LoadingManager {
       urlModifier = transform;
       return this;
     };
-    this.addHandler = function(regex, loader) {
-      handlers.push(regex, loader);
+    this.addHandler = function(regex, loader2) {
+      handlers.push(regex, loader2);
       return this;
     };
     this.removeHandler = function(regex) {
@@ -20519,11 +20519,11 @@ class LoadingManager {
     this.getHandler = function(file) {
       for (let i = 0, l = handlers.length; i < l; i += 2) {
         const regex = handlers[i];
-        const loader = handlers[i + 1];
+        const loader2 = handlers[i + 1];
         if (regex.global)
           regex.lastIndex = 0;
         if (regex.test(file)) {
-          return loader;
+          return loader2;
         }
       }
       return null;
@@ -20750,12 +20750,12 @@ class CubeTextureLoader extends Loader {
   }
   load(urls, onLoad, onProgress, onError) {
     const texture = new CubeTexture();
-    const loader = new ImageLoader(this.manager);
-    loader.setCrossOrigin(this.crossOrigin);
-    loader.setPath(this.path);
+    const loader2 = new ImageLoader(this.manager);
+    loader2.setCrossOrigin(this.crossOrigin);
+    loader2.setPath(this.path);
     let loaded = 0;
     function loadTexture(i) {
-      loader.load(urls[i], function(image) {
+      loader2.load(urls[i], function(image) {
         texture.images[i] = image;
         loaded++;
         if (loaded === 6) {
@@ -20777,10 +20777,10 @@ class TextureLoader extends Loader {
   }
   load(url, onLoad, onProgress, onError) {
     const texture = new Texture();
-    const loader = new ImageLoader(this.manager);
-    loader.setCrossOrigin(this.crossOrigin);
-    loader.setPath(this.path);
-    loader.load(url, function(image) {
+    const loader2 = new ImageLoader(this.manager);
+    loader2.setCrossOrigin(this.crossOrigin);
+    loader2.setPath(this.path);
+    loader2.load(url, function(image) {
       texture.image = image;
       texture.needsUpdate = true;
       if (onLoad !== void 0) {
@@ -20844,8 +20844,8 @@ const _projScreenMatrix$1 = /* @__PURE__ */ new Matrix4();
 const _lightPositionWorld$1 = /* @__PURE__ */ new Vector3();
 const _lookTarget$1 = /* @__PURE__ */ new Vector3();
 class LightShadow {
-  constructor(camera) {
-    this.camera = camera;
+  constructor(camera2) {
+    this.camera = camera2;
     this.bias = 0;
     this.normalBias = 0;
     this.radius = 1;
@@ -20928,15 +20928,15 @@ class SpotLightShadow extends LightShadow {
     this.focus = 1;
   }
   updateMatrices(light) {
-    const camera = this.camera;
+    const camera2 = this.camera;
     const fov2 = RAD2DEG * 2 * light.angle * this.focus;
     const aspect2 = this.mapSize.width / this.mapSize.height;
-    const far = light.distance || camera.far;
-    if (fov2 !== camera.fov || aspect2 !== camera.aspect || far !== camera.far) {
-      camera.fov = fov2;
-      camera.aspect = aspect2;
-      camera.far = far;
-      camera.updateProjectionMatrix();
+    const far = light.distance || camera2.far;
+    if (fov2 !== camera2.fov || aspect2 !== camera2.aspect || far !== camera2.far) {
+      camera2.fov = fov2;
+      camera2.aspect = aspect2;
+      camera2.far = far;
+      camera2.updateProjectionMatrix();
     }
     super.updateMatrices(light);
   }
@@ -21015,22 +21015,22 @@ class PointLightShadow extends LightShadow {
     ];
   }
   updateMatrices(light, viewportIndex = 0) {
-    const camera = this.camera;
+    const camera2 = this.camera;
     const shadowMatrix = this.matrix;
-    const far = light.distance || camera.far;
-    if (far !== camera.far) {
-      camera.far = far;
-      camera.updateProjectionMatrix();
+    const far = light.distance || camera2.far;
+    if (far !== camera2.far) {
+      camera2.far = far;
+      camera2.updateProjectionMatrix();
     }
     _lightPositionWorld.setFromMatrixPosition(light.matrixWorld);
-    camera.position.copy(_lightPositionWorld);
-    _lookTarget.copy(camera.position);
+    camera2.position.copy(_lightPositionWorld);
+    _lookTarget.copy(camera2.position);
     _lookTarget.add(this._cubeDirections[viewportIndex]);
-    camera.up.copy(this._cubeUps[viewportIndex]);
-    camera.lookAt(_lookTarget);
-    camera.updateMatrixWorld();
+    camera2.up.copy(this._cubeUps[viewportIndex]);
+    camera2.lookAt(_lookTarget);
+    camera2.updateMatrixWorld();
     shadowMatrix.makeTranslation(-_lightPositionWorld.x, -_lightPositionWorld.y, -_lightPositionWorld.z);
-    _projScreenMatrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+    _projScreenMatrix.multiplyMatrices(camera2.projectionMatrix, camera2.matrixWorldInverse);
     this._frustum.setFromProjectionMatrix(_projScreenMatrix);
   }
 }
@@ -21386,12 +21386,12 @@ class AudioLoader extends Loader {
   }
   load(url, onLoad, onProgress, onError) {
     const scope = this;
-    const loader = new FileLoader(this.manager);
-    loader.setResponseType("arraybuffer");
-    loader.setPath(this.path);
-    loader.setRequestHeader(this.requestHeader);
-    loader.setWithCredentials(this.withCredentials);
-    loader.load(url, function(buffer) {
+    const loader2 = new FileLoader(this.manager);
+    loader2.setResponseType("arraybuffer");
+    loader2.setPath(this.path);
+    loader2.setRequestHeader(this.requestHeader);
+    loader2.setWithCredentials(this.withCredentials);
+    loader2.load(url, function(buffer) {
       try {
         const bufferCopy = buffer.slice(0);
         const context = AudioContext.getContext();
@@ -22176,8 +22176,8 @@ PropertyBinding.prototype.SetterByBindingTypeAndVersioning = [
   ]
 ];
 class AnimationAction {
-  constructor(mixer, clip, localRoot = null, blendMode = clip.blendMode) {
-    this._mixer = mixer;
+  constructor(mixer2, clip, localRoot = null, blendMode = clip.blendMode) {
+    this._mixer = mixer2;
     this._clip = clip;
     this._localRoot = localRoot;
     this.blendMode = blendMode;
@@ -22300,10 +22300,10 @@ class AnimationAction {
     return this.warp(this._effectiveTimeScale, 0, duration);
   }
   warp(startTimeScale, endTimeScale, duration) {
-    const mixer = this._mixer, now2 = mixer.time, timeScale = this.timeScale;
+    const mixer2 = this._mixer, now2 = mixer2.time, timeScale = this.timeScale;
     let interpolant = this._timeScaleInterpolant;
     if (interpolant === null) {
-      interpolant = mixer._lendControlInterpolant();
+      interpolant = mixer2._lendControlInterpolant();
       this._timeScaleInterpolant = interpolant;
     }
     const times = interpolant.parameterPositions, values = interpolant.sampleValues;
@@ -22511,10 +22511,10 @@ class AnimationAction {
     }
   }
   _scheduleFading(duration, weightNow, weightThen) {
-    const mixer = this._mixer, now2 = mixer.time;
+    const mixer2 = this._mixer, now2 = mixer2.time;
     let interpolant = this._weightInterpolant;
     if (interpolant === null) {
-      interpolant = mixer._lendControlInterpolant();
+      interpolant = mixer2._lendControlInterpolant();
       this._weightInterpolant = interpolant;
     }
     const times = interpolant.parameterPositions, values = interpolant.sampleValues;
@@ -23013,6 +23013,75 @@ class GridHelper extends LineSegments {
     const material = new LineBasicMaterial({ vertexColors: true, toneMapped: false });
     super(geometry, material);
     this.type = "GridHelper";
+  }
+}
+class AxesHelper extends LineSegments {
+  constructor(size = 1) {
+    const vertices = [
+      0,
+      0,
+      0,
+      size,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      size,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      size
+    ];
+    const colors = [
+      1,
+      0,
+      0,
+      1,
+      0.6,
+      0,
+      0,
+      1,
+      0,
+      0.6,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0.6,
+      1
+    ];
+    const geometry = new BufferGeometry();
+    geometry.setAttribute("position", new Float32BufferAttribute(vertices, 3));
+    geometry.setAttribute("color", new Float32BufferAttribute(colors, 3));
+    const material = new LineBasicMaterial({ vertexColors: true, toneMapped: false });
+    super(geometry, material);
+    this.type = "AxesHelper";
+  }
+  setColors(xAxisColor, yAxisColor, zAxisColor) {
+    const color = new Color();
+    const array = this.geometry.attributes.color.array;
+    color.set(xAxisColor);
+    color.toArray(array, 0);
+    color.toArray(array, 3);
+    color.set(yAxisColor);
+    color.toArray(array, 6);
+    color.toArray(array, 9);
+    color.set(zAxisColor);
+    color.toArray(array, 12);
+    color.toArray(array, 15);
+    this.geometry.attributes.color.needsUpdate = true;
+    return this;
+  }
+  dispose() {
+    this.geometry.dispose();
+    this.material.dispose();
   }
 }
 const _floatView = new Float32Array(1);
@@ -23885,9 +23954,9 @@ Audio.prototype.load = function(file) {
   });
   return this;
 };
-CubeCamera.prototype.updateCubeMap = function(renderer2, scene) {
+CubeCamera.prototype.updateCubeMap = function(renderer2, scene2) {
   console.warn("THREE.CubeCamera: .updateCubeMap() is now .update().");
-  return this.update(renderer2, scene);
+  return this.update(renderer2, scene2);
 };
 CubeCamera.prototype.clear = function(renderer2, color, depth, stencil) {
   console.warn("THREE.CubeCamera: .clear() is now .renderTarget.clear().");
@@ -23896,18 +23965,18 @@ CubeCamera.prototype.clear = function(renderer2, color, depth, stencil) {
 ImageUtils.crossOrigin = void 0;
 ImageUtils.loadTexture = function(url, mapping, onLoad, onError) {
   console.warn("THREE.ImageUtils.loadTexture has been deprecated. Use THREE.TextureLoader() instead.");
-  const loader = new TextureLoader();
-  loader.setCrossOrigin(this.crossOrigin);
-  const texture = loader.load(url, onLoad, void 0, onError);
+  const loader2 = new TextureLoader();
+  loader2.setCrossOrigin(this.crossOrigin);
+  const texture = loader2.load(url, onLoad, void 0, onError);
   if (mapping)
     texture.mapping = mapping;
   return texture;
 };
 ImageUtils.loadTextureCube = function(urls, mapping, onLoad, onError) {
   console.warn("THREE.ImageUtils.loadTextureCube has been deprecated. Use THREE.CubeTextureLoader() instead.");
-  const loader = new CubeTextureLoader();
-  loader.setCrossOrigin(this.crossOrigin);
-  const texture = loader.load(urls, onLoad, void 0, onError);
+  const loader2 = new CubeTextureLoader();
+  loader2.setCrossOrigin(this.crossOrigin);
+  const texture = loader2.load(urls, onLoad, void 0, onError);
   if (mapping)
     texture.mapping = mapping;
   return texture;
@@ -23988,12 +24057,12 @@ class GLTFLoader extends Loader {
       scope.manager.itemError(url);
       scope.manager.itemEnd(url);
     };
-    const loader = new FileLoader(this.manager);
-    loader.setPath(this.path);
-    loader.setResponseType("arraybuffer");
-    loader.setRequestHeader(this.requestHeader);
-    loader.setWithCredentials(this.withCredentials);
-    loader.load(url, function(data) {
+    const loader2 = new FileLoader(this.manager);
+    loader2.setPath(this.path);
+    loader2.setResponseType("arraybuffer");
+    loader2.setRequestHeader(this.requestHeader);
+    loader2.setWithCredentials(this.withCredentials);
+    loader2.load(url, function(data) {
       try {
         scope.parse(data, resourcePath, function(gltf) {
           onLoad(gltf);
@@ -24458,15 +24527,15 @@ class GLTFTextureBasisUExtension {
     }
     const extension = textureDef.extensions[this.name];
     const source = json.images[extension.source];
-    const loader = parser.options.ktx2Loader;
-    if (!loader) {
+    const loader2 = parser.options.ktx2Loader;
+    if (!loader2) {
       if (json.extensionsRequired && json.extensionsRequired.indexOf(this.name) >= 0) {
         throw new Error("THREE.GLTFLoader: setKTX2Loader must be called before loading KTX2 textures");
       } else {
         return null;
       }
     }
-    return parser.loadTextureImage(textureIndex, source, loader);
+    return parser.loadTextureImage(textureIndex, source, loader2);
   }
 }
 class GLTFTextureWebPExtension {
@@ -24485,15 +24554,15 @@ class GLTFTextureWebPExtension {
     }
     const extension = textureDef.extensions[name];
     const source = json.images[extension.source];
-    let loader = parser.textureLoader;
+    let loader2 = parser.textureLoader;
     if (source.uri) {
       const handler = parser.options.manager.getHandler(source.uri);
       if (handler !== null)
-        loader = handler;
+        loader2 = handler;
     }
     return this.detectSupport().then(function(isSupported) {
       if (isSupported)
-        return parser.loadTextureImage(textureIndex, source, loader);
+        return parser.loadTextureImage(textureIndex, source, loader2);
       if (json.extensionsRequired && json.extensionsRequired.indexOf(name) >= 0) {
         throw new Error("THREE.GLTFLoader: WebP required by asset but unsupported.");
       }
@@ -25324,7 +25393,7 @@ class GLTFParser {
   }
   loadBuffer(bufferIndex) {
     const bufferDef = this.json.buffers[bufferIndex];
-    const loader = this.fileLoader;
+    const loader2 = this.fileLoader;
     if (bufferDef.type && bufferDef.type !== "arraybuffer") {
       throw new Error("THREE.GLTFLoader: " + bufferDef.type + " buffer type is not supported.");
     }
@@ -25333,7 +25402,7 @@ class GLTFParser {
     }
     const options = this.options;
     return new Promise(function(resolve, reject) {
-      loader.load(LoaderUtils.resolveURL(bufferDef.uri, options.path), resolve, void 0, function() {
+      loader2.load(LoaderUtils.resolveURL(bufferDef.uri, options.path), resolve, void 0, function() {
         reject(new Error('THREE.GLTFLoader: Failed to load buffer "' + bufferDef.uri + '".'));
       });
     });
@@ -25422,15 +25491,15 @@ class GLTFParser {
     const options = this.options;
     const textureDef = json.textures[textureIndex];
     const source = json.images[textureDef.source];
-    let loader = this.textureLoader;
+    let loader2 = this.textureLoader;
     if (source.uri) {
       const handler = options.manager.getHandler(source.uri);
       if (handler !== null)
-        loader = handler;
+        loader2 = handler;
     }
-    return this.loadTextureImage(textureIndex, source, loader);
+    return this.loadTextureImage(textureIndex, source, loader2);
   }
-  loadTextureImage(textureIndex, source, loader) {
+  loadTextureImage(textureIndex, source, loader2) {
     const parser = this;
     const json = this.json;
     const options = this.options;
@@ -25455,14 +25524,14 @@ class GLTFParser {
     const promise = Promise.resolve(sourceURI).then(function(sourceURI2) {
       return new Promise(function(resolve, reject) {
         let onLoad = resolve;
-        if (loader.isImageBitmapLoader === true) {
+        if (loader2.isImageBitmapLoader === true) {
           onLoad = function(imageBitmap) {
             const texture = new Texture(imageBitmap);
             texture.needsUpdate = true;
             resolve(texture);
           };
         }
-        loader.load(LoaderUtils.resolveURL(sourceURI2, options.path), onLoad, void 0, reject);
+        loader2.load(LoaderUtils.resolveURL(sourceURI2, options.path), onLoad, void 0, reject);
       });
     }).then(function(texture) {
       if (isObjectURL === true) {
@@ -25773,7 +25842,7 @@ class GLTFParser {
     });
   }
   loadCamera(cameraIndex) {
-    let camera;
+    let camera2;
     const cameraDef = this.json.cameras[cameraIndex];
     const params = cameraDef[cameraDef.type];
     if (!params) {
@@ -25781,14 +25850,14 @@ class GLTFParser {
       return;
     }
     if (cameraDef.type === "perspective") {
-      camera = new PerspectiveCamera(MathUtils.radToDeg(params.yfov), params.aspectRatio || 1, params.znear || 1, params.zfar || 2e6);
+      camera2 = new PerspectiveCamera(MathUtils.radToDeg(params.yfov), params.aspectRatio || 1, params.znear || 1, params.zfar || 2e6);
     } else if (cameraDef.type === "orthographic") {
-      camera = new OrthographicCamera(-params.xmag, params.xmag, params.ymag, -params.ymag, params.znear, params.zfar);
+      camera2 = new OrthographicCamera(-params.xmag, params.xmag, params.ymag, -params.ymag, params.znear, params.zfar);
     }
     if (cameraDef.name)
-      camera.name = this.createUniqueName(cameraDef.name);
-    assignExtrasToUserData(camera, cameraDef);
-    return Promise.resolve(camera);
+      camera2.name = this.createUniqueName(cameraDef.name);
+    assignExtrasToUserData(camera2, cameraDef);
+    return Promise.resolve(camera2);
   }
   loadSkin(skinIndex) {
     const skinDef = this.json.skins[skinIndex];
@@ -25931,8 +26000,8 @@ class GLTFParser {
         pending.push(meshPromise);
       }
       if (nodeDef.camera !== void 0) {
-        pending.push(parser.getDependency("camera", nodeDef.camera).then(function(camera) {
-          return parser._getNodeRef(parser.cameraCache, nodeDef.camera, camera);
+        pending.push(parser.getDependency("camera", nodeDef.camera).then(function(camera2) {
+          return parser._getNodeRef(parser.cameraCache, nodeDef.camera, camera2);
         }));
       }
       parser._invokeAll(function(ext) {
@@ -25991,16 +26060,16 @@ class GLTFParser {
     const extensions = this.extensions;
     const sceneDef = this.json.scenes[sceneIndex];
     const parser = this;
-    const scene = new Group();
+    const scene2 = new Group();
     if (sceneDef.name)
-      scene.name = parser.createUniqueName(sceneDef.name);
-    assignExtrasToUserData(scene, sceneDef);
+      scene2.name = parser.createUniqueName(sceneDef.name);
+    assignExtrasToUserData(scene2, sceneDef);
     if (sceneDef.extensions)
-      addUnknownExtensionsToUserData(extensions, scene, sceneDef);
+      addUnknownExtensionsToUserData(extensions, scene2, sceneDef);
     const nodeIds = sceneDef.nodes || [];
     const pending = [];
     for (let i = 0, il = nodeIds.length; i < il; i++) {
-      pending.push(buildNodeHierarchy(nodeIds[i], scene, json, parser));
+      pending.push(buildNodeHierarchy(nodeIds[i], scene2, json, parser));
     }
     return Promise.all(pending).then(function() {
       const reduceAssociations = (node) => {
@@ -26018,8 +26087,8 @@ class GLTFParser {
         });
         return reducedAssociations;
       };
-      parser.associations = reduceAssociations(scene);
-      return scene;
+      parser.associations = reduceAssociations(scene2);
+      return scene2;
     });
   }
 }
@@ -26233,12 +26302,12 @@ class DRACOLoader extends Loader {
     return this;
   }
   load(url, onLoad, onProgress, onError) {
-    const loader = new FileLoader(this.manager);
-    loader.setPath(this.path);
-    loader.setResponseType("arraybuffer");
-    loader.setRequestHeader(this.requestHeader);
-    loader.setWithCredentials(this.withCredentials);
-    loader.load(url, (buffer) => {
+    const loader2 = new FileLoader(this.manager);
+    loader2.setPath(this.path);
+    loader2.setResponseType("arraybuffer");
+    loader2.setRequestHeader(this.requestHeader);
+    loader2.setWithCredentials(this.withCredentials);
+    loader2.load(url, (buffer) => {
       const taskConfig = {
         attributeIDs: this.defaultAttributeIDs,
         attributeTypes: this.defaultAttributeTypes,
@@ -26307,12 +26376,12 @@ class DRACOLoader extends Loader {
     return geometry;
   }
   _loadLibrary(url, responseType) {
-    const loader = new FileLoader(this.manager);
-    loader.setPath(this.decoderPath);
-    loader.setResponseType(responseType);
-    loader.setWithCredentials(this.withCredentials);
+    const loader2 = new FileLoader(this.manager);
+    loader2.setPath(this.decoderPath);
+    loader2.setResponseType(responseType);
+    loader2.setWithCredentials(this.withCredentials);
     return new Promise((resolve, reject) => {
-      loader.load(url, resolve, void 0, reject);
+      loader2.load(url, resolve, void 0, reject);
     });
   }
   preload() {
@@ -27172,9 +27241,102 @@ class OrbitControls extends EventDispatcher {
     this.update();
   }
 }
-let renderer;
+var Stats = function() {
+  var mode = 0;
+  var container = document.createElement("div");
+  container.style.cssText = "position:fixed;top:0;left:0;cursor:pointer;opacity:0.9;z-index:10000";
+  container.addEventListener("click", function(event) {
+    event.preventDefault();
+    showPanel(++mode % container.children.length);
+  }, false);
+  function addPanel(panel) {
+    container.appendChild(panel.dom);
+    return panel;
+  }
+  function showPanel(id) {
+    for (var i = 0; i < container.children.length; i++) {
+      container.children[i].style.display = i === id ? "block" : "none";
+    }
+    mode = id;
+  }
+  var beginTime = (performance || Date).now(), prevTime = beginTime, frames = 0;
+  var fpsPanel = addPanel(new Stats.Panel("FPS", "#0ff", "#002"));
+  var msPanel = addPanel(new Stats.Panel("MS", "#0f0", "#020"));
+  if (self.performance && self.performance.memory) {
+    var memPanel = addPanel(new Stats.Panel("MB", "#f08", "#201"));
+  }
+  showPanel(0);
+  return {
+    REVISION: 16,
+    dom: container,
+    addPanel,
+    showPanel,
+    begin: function() {
+      beginTime = (performance || Date).now();
+    },
+    end: function() {
+      frames++;
+      var time = (performance || Date).now();
+      msPanel.update(time - beginTime, 200);
+      if (time >= prevTime + 1e3) {
+        fpsPanel.update(frames * 1e3 / (time - prevTime), 100);
+        prevTime = time;
+        frames = 0;
+        if (memPanel) {
+          var memory = performance.memory;
+          memPanel.update(memory.usedJSHeapSize / 1048576, memory.jsHeapSizeLimit / 1048576);
+        }
+      }
+      return time;
+    },
+    update: function() {
+      beginTime = this.end();
+    },
+    domElement: container,
+    setMode: showPanel
+  };
+};
+Stats.Panel = function(name, fg, bg) {
+  var min = Infinity, max = 0, round = Math.round;
+  var PR = round(window.devicePixelRatio || 1);
+  var WIDTH = 80 * PR, HEIGHT = 48 * PR, TEXT_X = 3 * PR, TEXT_Y = 2 * PR, GRAPH_X = 3 * PR, GRAPH_Y = 15 * PR, GRAPH_WIDTH = 74 * PR, GRAPH_HEIGHT = 30 * PR;
+  var canvas = document.createElement("canvas");
+  canvas.width = WIDTH;
+  canvas.height = HEIGHT;
+  canvas.style.cssText = "width:80px;height:48px";
+  var context = canvas.getContext("2d");
+  context.font = "bold " + 9 * PR + "px Helvetica,Arial,sans-serif";
+  context.textBaseline = "top";
+  context.fillStyle = bg;
+  context.fillRect(0, 0, WIDTH, HEIGHT);
+  context.fillStyle = fg;
+  context.fillText(name, TEXT_X, TEXT_Y);
+  context.fillRect(GRAPH_X, GRAPH_Y, GRAPH_WIDTH, GRAPH_HEIGHT);
+  context.fillStyle = bg;
+  context.globalAlpha = 0.9;
+  context.fillRect(GRAPH_X, GRAPH_Y, GRAPH_WIDTH, GRAPH_HEIGHT);
+  return {
+    dom: canvas,
+    update: function(value, maxValue) {
+      min = Math.min(min, value);
+      max = Math.max(max, value);
+      context.fillStyle = bg;
+      context.globalAlpha = 1;
+      context.fillRect(0, 0, WIDTH, GRAPH_Y);
+      context.fillStyle = fg;
+      context.fillText(round(value) + " " + name + " (" + round(min) + "-" + round(max) + ")", TEXT_X, TEXT_Y);
+      context.drawImage(canvas, GRAPH_X + PR, GRAPH_Y, GRAPH_WIDTH - PR, GRAPH_HEIGHT, GRAPH_X, GRAPH_Y, GRAPH_WIDTH - PR, GRAPH_HEIGHT);
+      context.fillRect(GRAPH_X + GRAPH_WIDTH - PR, GRAPH_Y, PR, GRAPH_HEIGHT);
+      context.fillStyle = bg;
+      context.globalAlpha = 0.9;
+      context.fillRect(GRAPH_X + GRAPH_WIDTH - PR, GRAPH_Y, PR, round((1 - value / maxValue) * GRAPH_HEIGHT));
+    }
+  };
+};
+let scene, camera, clock, renderer, mixer, controls, loader, stats, debug;
 const setupScene = (_debug) => {
-  new Scene();
+  debug = _debug != null ? _debug : false;
+  scene = new Scene();
   clock = new Clock();
   renderer = new WebGLRenderer({ alpha: true, antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -27184,6 +27346,143 @@ const setupScene = (_debug) => {
   renderer.outputEncoding = sRGBEncoding;
   renderer.setClearColor(13421772);
   document.body.appendChild(renderer.domElement);
-  window.Print.postMessage("Completed setupScene");
+  if (debug) {
+    const s = Stats();
+    document.body.appendChild(s.dom);
+    stats = s.dom;
+    window.Print.postMessage("Scene Created with stats... 10%");
+  }
+};
+const createPerspectiveCamera = (fov2, aspectRatio, near, far) => {
+  camera = new PerspectiveCamera(fov2, aspectRatio != null ? aspectRatio : window.innerWidth / window.innerHeight, near, far);
+  window.camera = camera;
+  animate();
+};
+const setOrbitControls = (polMin, polMax, azMin, azMax, minDistance, maxDistance, enablePan, autoRotateSpeed, autoRotate, enableZoom2) => {
+  throw "No controls";
+};
+const setControlsTarget = (x, y, z) => {
+  controls.target.set(x, y, z);
+  controls.update();
+};
+const addGridHelper = () => {
+  var helper = new GridHelper(100, 100);
+  helper.rotation.x = Math.PI / 2;
+  helper.material.opacity = 1;
+  helper.material.transparent = false;
+  scene.add(helper);
+  var axis = new AxesHelper(1e3);
+  scene.add(axis);
+};
+const setBackgroundColor = (color, alpha) => {
+  if (color == null) {
+    renderer.setClearColor(13421772);
+  } else {
+    renderer.setClearColor(color, alpha);
+  }
+};
+const setCameraPosition = (x, y, z) => {
+  camera.position.set(x, y, z);
+  controls.update();
+};
+const setCameraRotation = (x, y, z) => {
+  camera.rotation.set(x, y, z);
+  controls.update();
+};
+const loadModel = (modelUrl, playAnimation) => {
+  return new Promise((res, rej) => {
+    loader = new GLTFLoader();
+    loader.setCrossOrigin("*");
+    loader.setRequestHeader({
+      "Access-Control-Allow-Origin": "*"
+    });
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath("decoder/");
+    dracoLoader.setDecoderConfig({ type: "js" });
+    loader.setDRACOLoader(dracoLoader);
+    if (debug) {
+      window.Print.postMessage("trying to load the following: " + modelUrl);
+    }
+    //! set cross origins  to blank
+    console.log(loader.crossOrigin);
+    loader.load(modelUrl, function(gltf) {
+      if (playAnimation) {
+        mixer = new AnimationMixer(gltf.scene);
+        const action = mixer.clipAction(gltf.animations[0]);
+        action.play();
+      }
+      gltf.scene.traverse(function(node) {
+        if (node.isMesh) {
+          node.castShadow = true;
+          node.material.depthWrite = !node.material.transparent;
+        }
+      });
+      scene.add(gltf.scene);
+      res(gltf);
+      if (debug) {
+        window.Print.postMessage("loaded the following: " + modelUrl);
+      }
+    }, (xhr) => {
+      console.log(xhr.loaded / xhr.total * 100 + "% loaded");
+      window.onObjectLoading(xhr.loaded / xhr.total * 100);
+    }, (error) => {
+      console.log("An error happened", error);
+      window.onLoadError("on loading error: " + error);
+      rej(error);
+    });
+  });
+};
+const loadCam = (modelUrl) => {
+  return new Promise((res, rej) => {
+    loader = new GLTFLoader();
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath("decoder/");
+    dracoLoader.setDecoderConfig({ type: "js" });
+    loader.setDRACOLoader(dracoLoader);
+    loader.load(modelUrl, (gltf) => {
+      setCamera(gltf.cameras[0]);
+      animate();
+      res(gltf);
+    }, (xhr) => {
+      console.log(xhr.loaded / xhr.total * 100 + "% loaded");
+      window.onObjectLoading(xhr.loaded / xhr.total * 100);
+    }, (error) => {
+      console.log("An error happened", error);
+      window.onLoadError(error);
+      rej(error);
+    });
+  });
+};
+const addAmbientLight = (color, intensity) => {
+  const ambient = new AmbientLight(color, intensity);
+  scene.add(ambient);
+};
+const addDirectionalLight = (color, intensity, pos) => {
+  var _a, _b, _c;
+  const light2 = new DirectionalLight(color, intensity != null ? intensity : 0.8 * Math.PI);
+  light2.position.set((_a = pos == null ? void 0 : pos.x) != null ? _a : 0.5, (_b = pos == null ? void 0 : pos.y) != null ? _b : 0, (_c = pos == null ? void 0 : pos.z) != null ? _c : 0.866);
+  scene.add(light2);
+};
+const animate = () => {
+  requestAnimationFrame(animate);
+  var delta = clock.getDelta();
+  if (mixer)
+    mixer.update(delta);
+  renderer.render(scene, camera);
+  if (stats)
+    stats.update();
 };
 window.setupScene = setupScene;
+window.setOrbitControls = setOrbitControls;
+window.setControlsTarget = setControlsTarget;
+window.loadModel = loadModel;
+window.loadCam = loadCam;
+window.addGridHelper = addGridHelper;
+window.addAmbientLight = addAmbientLight;
+window.addDirectionalLight = addDirectionalLight;
+window.setCameraPosition = setCameraPosition;
+window.setCameraRotation = setCameraRotation;
+window.setBackgroundColor = setBackgroundColor;
+window.enableZoom = enableZoom;
+window.createPerspectiveCamera = createPerspectiveCamera;
+window.createOrbitControls = createOrbitControls;

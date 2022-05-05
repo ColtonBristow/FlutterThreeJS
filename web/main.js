@@ -21,16 +21,13 @@ const setupScene = (_debug) => {
   renderer.setClearColor(0xcccccc);
 
   document.body.appendChild(renderer.domElement);
-};
 
-const setStats = (enable) => {
-  if (enable) {
+  if (debug) {
     const s = Stats();
     document.body.appendChild(s.dom);
     stats = s.dom;
-  } else if (stats) {
-    stats.remove();
-    stats = undefined;
+
+    window.Print.postMessage("Scene Created with stats... 10%");
   }
 };
 
@@ -40,28 +37,25 @@ const createPerspectiveCamera = (fov, aspectRatio, near, far) => {
   animate();
 };
 
-const createOrbitControls = (c) => {
-  if (!camera && !c) throw "No camera";
-  controls = new OrbitControls(c ?? camera, renderer.domElement);
-  controls.enablePan = false;
-  controls.enableRotate = true;
-  controls.enableZoom = false;
-  controls.target.set(0.05, 1.24, 0.14);
-  controls.update();
-  animate();
-  window.controls = controls;
-};
-
-const enableZoom = (zoom) => {
-  controls.enableZoom = zoom;
-};
-
-const setOrbitControls = (polMin, polMax, azMin, azMax) => {
+const setOrbitControls = (polMin, polMax, azMin, azMax, minDistance, maxDistance, enablePan, autoRotateSpeed, autoRotate, enableZoom) => {
   if (!controls) throw "No controls";
+  controls = new OrbitControls(c ?? camera, renderer.domElement);
+  controls.target.set(0.05, 1.24, 0.14);
+
   controls.minPolarAngle = polMin ?? -Infinity;
   controls.maxPolarAngle = polMax ?? Infinity;
   controls.minAzimuthAngle = azMin ?? -Infinity;
   controls.maxAzimuthAngle = azMax ?? -Infinity;
+
+  controls.minDistance = minDistance ?? -Infinity;
+  controls.maxDistance = maxDistance ?? -Infinity;
+  controls.enablePan = enablePan ?? true;
+  controls.autoRotateSpeed = autoRotateSpeed ?? 0;
+  controls.autoRotate = autoRotate ?? false;
+
+  controls.update();
+  animate();
+  window.controls = controls;
 };
 
 const setControlsTarget = (x, y, z) => {
@@ -233,4 +227,3 @@ window.setBackgroundColor = setBackgroundColor;
 window.enableZoom = enableZoom;
 window.createPerspectiveCamera = createPerspectiveCamera;
 window.createOrbitControls = createOrbitControls;
-window.setStats = setStats;

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io' show InternetAddress, Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:local_assets_server/local_assets_server.dart';
 import 'package:threeJS_Viewer/threeJSController.dart';
@@ -10,23 +11,29 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 // ignore: must_be_immutable
 class ThreeJSViewer extends StatefulWidget {
-  ThreeJSController? controller;
+  ThreeJSController controller;
   Function? onPageFinishedLoading;
   Iterable<JavascriptChannel>? channels;
-  Function? onError;
+  Function(WebResourceError error)? onError;
   PerspectiveCameraConfig? cameraConfig;
   LocalAssetsServer? addressServer;
+  OrbitControls? orbitControls;
   bool? debug;
+  List<ThreeModel> models;
+  Completer<WebViewController>? controllerCompleter;
 
   ThreeJSViewer({
     Key? key,
-    this.cameraConfig,
-    this.controller,
+    required this.controller,
+    this.orbitControls,
+    this.onPageFinishedLoading,
     this.channels,
     this.onError,
-    this.onPageFinishedLoading,
+    this.cameraConfig,
     this.addressServer,
     this.debug,
+    required this.models,
+    this.controllerCompleter,
   }) : super(key: key);
 
   @override
@@ -34,20 +41,23 @@ class ThreeJSViewer extends StatefulWidget {
 }
 
 class _ThreeJSViewerState extends State<ThreeJSViewer> {
-  Future<InternetAddress>? address;
   double loadingProgress = 0;
   int port = 4000;
   Set<JavascriptChannel> channels = {};
+  Future<InternetAddress>? server;
 
   initServer() async {
     if (widget.addressServer == null) {
-      final server = LocalAssetsServer(
+      final las = LocalAssetsServer(
         port: 4000,
         address: InternetAddress.loopbackIPv4,
         assetsBasePath: 'packages/threeJS_Viewer/web',
         logger: const DebugLogger(),
       );
-      setState(() {});
+
+      server = las.serve();
+    } else {
+      server = widget.addressServer?.serve();
     }
   }
 
@@ -91,9 +101,8 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
 
   @override
   Widget build(BuildContext context) {
-    var wcontroller;
     return FutureBuilder(
-      future: address,
+      future: server,
       builder: (context, snapshot) {
         if (snapshot.hasData == false) {
           return const Center(
@@ -108,19 +117,34 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
             initialUrl: 'http://${address.address}:$port',
             javascriptMode: JavascriptMode.unrestricted,
             onWebViewCreated: (c) {
-              setState(() {
-                wcontroller = c;
-              });
+              widget.controllerCompleter?.complete(c);
               widget.controller = ThreeJSController(webController: c);
             },
             onPageFinished: (details) {
+              if (widget.controller.webController == null && kDebugMode) {
+                log('widget TJScontroller:  ${widget.controller.toString()} \n widget WVController: + ${widget.controller.webController.toString()}');
+              }
+              if (kDebugMode) {
+                log("calling js");
+              }
+
+              widget.controller.setupScene(widget.debug ?? false);
+              widget.controller.createCamera(widget.cameraConfig ?? PerspectiveCameraConfig(fov: 75, aspectRatio: null, far: 10000, near: 0.1));
+              widget.controller.createOrbitControls(
+                widget.orbitControls ??
+                    OrbitControls(
+                      minDistance: 3,
+                      maxDistance: 500,
+                      autoRotateSpeed: 2.5,
+                    ),
+              );
+              widget.controller.loadModels(widget.models);
+
               widget.onPageFinishedLoading;
-              log("calling js");
-              var setupResults = wcontroller.runJavascriptReturningResult('window.setupScene(${widget.debug ?? false})');
             },
             javascriptChannels: channels,
             onWebResourceError: (error) {
-              widget.onError;
+              widget.onError ?? () {};
             },
           );
         }
