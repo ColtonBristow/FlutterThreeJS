@@ -27333,7 +27333,7 @@ Stats.Panel = function(name, fg, bg) {
     }
   };
 };
-let scene, camera, clock, renderer, mixer, controls, loader, stats, debug;
+let scene, camera, clock, renderer, mixer, controls, loader, debug;
 const setupScene = (_debug) => {
   debug = _debug != null ? _debug : false;
   scene = new Scene();
@@ -27349,7 +27349,6 @@ const setupScene = (_debug) => {
   if (debug) {
     const s = Stats();
     document.body.appendChild(s.dom);
-    stats = s.dom;
     window.Print.postMessage("Scene Created with stats... 10%");
   }
 };
@@ -27358,8 +27357,22 @@ const createPerspectiveCamera = (fov2, aspectRatio, near, far) => {
   window.camera = camera;
   animate();
 };
-const setOrbitControls = (polMin, polMax, azMin, azMax, minDistance, maxDistance, enablePan, autoRotateSpeed, autoRotate, enableZoom2) => {
-  throw "No controls";
+const setOrbitControls = (polMin, polMax, azMin, azMax, minDistance, maxDistance, enablePan, autoRotateSpeed, autoRotate, enableZoom, c) => {
+  controls = new OrbitControls(c != null ? c : camera, renderer.domElement);
+  controls.target.set(0.05, 1.24, 0.14);
+  controls.minPolarAngle = polMin != null ? polMin : -Infinity;
+  controls.maxPolarAngle = polMax != null ? polMax : Infinity;
+  controls.minAzimuthAngle = azMin != null ? azMin : -Infinity;
+  controls.maxAzimuthAngle = azMax != null ? azMax : -Infinity;
+  controls.minDistance = minDistance != null ? minDistance : -Infinity;
+  controls.maxDistance = maxDistance != null ? maxDistance : Infinity;
+  controls.enablePan = enablePan != null ? enablePan : true;
+  controls.autoRotateSpeed = autoRotateSpeed != null ? autoRotateSpeed : 0;
+  controls.autoRotate = autoRotate != null ? autoRotate : false;
+  controls.enableZoom = enableZoom != null ? enableZoom : true;
+  controls.update();
+  animate();
+  window.controls = controls;
 };
 const setControlsTarget = (x, y, z) => {
   controls.target.set(x, y, z);
@@ -27373,13 +27386,6 @@ const addGridHelper = () => {
   scene.add(helper);
   var axis = new AxesHelper(1e3);
   scene.add(axis);
-};
-const setBackgroundColor = (color, alpha) => {
-  if (color == null) {
-    renderer.setClearColor(13421772);
-  } else {
-    renderer.setClearColor(color, alpha);
-  }
 };
 const setCameraPosition = (x, y, z) => {
   camera.position.set(x, y, z);
@@ -27468,9 +27474,9 @@ const animate = () => {
   var delta = clock.getDelta();
   if (mixer)
     mixer.update(delta);
+  if (controls)
+    controls.update();
   renderer.render(scene, camera);
-  if (stats)
-    stats.update();
 };
 window.setupScene = setupScene;
 window.setOrbitControls = setOrbitControls;
@@ -27482,7 +27488,4 @@ window.addAmbientLight = addAmbientLight;
 window.addDirectionalLight = addDirectionalLight;
 window.setCameraPosition = setCameraPosition;
 window.setCameraRotation = setCameraRotation;
-window.setBackgroundColor = setBackgroundColor;
-window.enableZoom = enableZoom;
 window.createPerspectiveCamera = createPerspectiveCamera;
-window.createOrbitControls = createOrbitControls;

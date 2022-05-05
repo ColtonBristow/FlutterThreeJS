@@ -17,24 +17,35 @@ class ThreeJSController {
 
   void loadModels(List<ThreeModel> models) async {
     for (var model in models) {
-      webController?.runJavascript('window.loadModel(\'${model.src}\', ${model.playAnimation})').then((value) => value);
-
       if (kDebugMode) {
-        log("loaded model: ${model.src}");
+        log("trying to load the following model: ${model.src}");
       }
+      webController?.runJavascript('window.loadModel(\'${model.src}\', ${model.playAnimation})');
     }
   }
 
   void createCamera(PerspectiveCameraConfig camera) {
+    if (kDebugMode) {
+      log('trying to create a camera with the following properties: ${camera.toString()}');
+    }
+
     //TODO: make multiple camera configs and the option to add multiple cameras for transitions
     webController?.runJavascript('window.createPerspectiveCamera($camera)');
   }
 
   void createOrbitControls(OrbitControls oc) {
-    webController?.runJavascript('window.setOrbitControls(${oc.toString()})');
-
     if (kDebugMode) {
-      log('adding the following controls ${oc.toString()}');
+      log('trying to add the following controls ${oc.toString()}');
     }
+
+    webController?.runJavascript('window.setOrbitControls(${oc.toString()})');
+  }
+
+  void addAmbientLight(String color, int intensity) {
+    webController?.runJavascript('window.addAmbientLight(\'$color\', $intensity)');
+  }
+
+  void addDirectionalLight(DirectionalLight light) {
+    webController?.runJavascript('window.addDirectionalLight(${light.toString(map: true)})');
   }
 }

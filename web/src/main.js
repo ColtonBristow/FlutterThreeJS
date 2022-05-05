@@ -189,7 +189,7 @@ const addDirectionalLight = (color, intensity, pos) => {
 const setupLights = (type, position, colorRGB, distance, intensity, decay) => {
   switch (type) {
     case "ambientLight":
-      addAmbientLight(colorRGB, intensity);
+
     case "directionalLight":
 
     case "hemisphereLight":

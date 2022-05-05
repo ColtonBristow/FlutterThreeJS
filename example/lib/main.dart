@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
           backgroundColor: Colors.redAccent,
         ),
         body: ThreeJSViewer(
+          debug: true,
           controller: controller,
           onError: (details) {
             ScaffoldMessenger.of(context).showSnackBar(
