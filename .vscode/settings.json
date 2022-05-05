@@ -42,17 +42,19 @@
 	"Sotheby",
 	"subosito",
 	"Talbote",
+	"trns",
+	"tweenjs",
 	"webp",
 	"worldstagetheatre"
 ],
   "liveServer.settings.port": 5501,
-	"explorer.experimental.fileNesting.enabled": true,
-	"explorer.experimental.fileNesting.expand": false,
-	"explorer.experimental.fileNesting.patterns": {
-		"pubspec.yaml": "pubspec.lock,analysis_options.yaml, .packages, .metadata, .flutter-plugins, .flutter-plugins-dependencies, flutter_launcher_icons.yaml",
-		".gitignore": ".gitattributes, .gitmodules, .gitkeep, README.md, LICENSE",
-		"flutter_native_splash.yaml": "flutter_launcher_icons.yaml",
-		"firebase.json": ".firebaserc",
-		"Makefile": "build.yaml, l10n.yaml",
-	},
+  "explorer.experimental.fileNesting.enabled": true,
+  "explorer.experimental.fileNesting.expand": false,
+  "explorer.experimental.fileNesting.patterns": {
+    "pubspec.yaml": "pubspec.lock,analysis_options.yaml, .packages, .metadata, .flutter-plugins, .flutter-plugins-dependencies, flutter_launcher_icons.yaml",
+    ".gitignore": ".gitattributes, .gitmodules, .gitkeep, README.md, LICENSE",
+    "flutter_native_splash.yaml": "flutter_launcher_icons.yaml",
+    "firebase.json": ".firebaserc",
+    "Makefile": "build.yaml, l10n.yaml"
+  }
 }
