@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io' show InternetAddress, Platform;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:local_assets_server/local_assets_server.dart';
 import 'package:threeJS_Viewer/threeJSController.dart';
@@ -112,6 +113,12 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
           InternetAddress address = snapshot.data as InternetAddress;
           log('started local server http://${address.address}:$port');
           return WebView(
+            // ignore: prefer_collection_literals
+            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+              Factory<OneSequenceGestureRecognizer>(
+                () => EagerGestureRecognizer(),
+              ),
+            ].toSet(),
             debuggingEnabled: true,
             backgroundColor: Colors.transparent,
             initialUrl: 'http://${address.address}:$port',
@@ -139,7 +146,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
                     ),
               );
               widget.controller.loadModels(widget.models);
-
+              widget.controller.addAmbientLight('0xff0000', 1);
               widget.onPageFinishedLoading;
             },
             javascriptChannels: channels,

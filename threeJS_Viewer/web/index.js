@@ -27359,7 +27359,7 @@ const createPerspectiveCamera = (fov2, aspectRatio, near, far) => {
 };
 const setOrbitControls = (polMin, polMax, azMin, azMax, minDistance, maxDistance, enablePan, autoRotateSpeed, autoRotate, enableZoom, c) => {
   controls = new OrbitControls(c != null ? c : camera, renderer.domElement);
-  controls.target.set(0.05, 1.24, 0.14);
+  controls.target.set(0, 0, 0);
   controls.minPolarAngle = polMin != null ? polMin : -Infinity;
   controls.maxPolarAngle = polMax != null ? polMax : Infinity;
   controls.minAzimuthAngle = azMin != null ? azMin : -Infinity;
@@ -27398,19 +27398,10 @@ const setCameraRotation = (x, y, z) => {
 const loadModel = (modelUrl, playAnimation) => {
   return new Promise((res, rej) => {
     loader = new GLTFLoader();
-    loader.setCrossOrigin("*");
-    loader.setRequestHeader({
-      "Access-Control-Allow-Origin": "*"
-    });
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath("decoder/");
     dracoLoader.setDecoderConfig({ type: "js" });
     loader.setDRACOLoader(dracoLoader);
-    if (debug) {
-      window.Print.postMessage("trying to load the following: " + modelUrl);
-    }
-    //! set cross origins  to blank
-    console.log(loader.crossOrigin);
     loader.load(modelUrl, function(gltf) {
       if (playAnimation) {
         mixer = new AnimationMixer(gltf.scene);
@@ -27463,12 +27454,6 @@ const addAmbientLight = (color, intensity) => {
   const ambient = new AmbientLight(color, intensity);
   scene.add(ambient);
 };
-const addDirectionalLight = (color, intensity, pos) => {
-  var _a, _b, _c;
-  const light2 = new DirectionalLight(color, intensity != null ? intensity : 0.8 * Math.PI);
-  light2.position.set((_a = pos == null ? void 0 : pos.x) != null ? _a : 0.5, (_b = pos == null ? void 0 : pos.y) != null ? _b : 0, (_c = pos == null ? void 0 : pos.z) != null ? _c : 0.866);
-  scene.add(light2);
-};
 const animate = () => {
   requestAnimationFrame(animate);
   var delta = clock.getDelta();
@@ -27482,10 +27467,9 @@ window.setupScene = setupScene;
 window.setOrbitControls = setOrbitControls;
 window.setControlsTarget = setControlsTarget;
 window.loadModel = loadModel;
+window.addAmbientLight = addAmbientLight;
 window.loadCam = loadCam;
 window.addGridHelper = addGridHelper;
-window.addAmbientLight = addAmbientLight;
-window.addDirectionalLight = addDirectionalLight;
 window.setCameraPosition = setCameraPosition;
 window.setCameraRotation = setCameraRotation;
 window.createPerspectiveCamera = createPerspectiveCamera;
