@@ -1,4 +1,4 @@
-import { AnimationMixer, WebGLRenderer, AmbientLight, Scene, PerspectiveCamera, Clock, DirectionalLight, sRGBEncoding, GridHelper, AxesHelper, LightShadow } from "three";
+import { AnimationMixer, WebGLRenderer, AmbientLight, Scene, PerspectiveCamera, Clock, DirectionalLight, sRGBEncoding, GridHelper, AxesHelper } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -184,19 +184,19 @@ const addAmbientLight = (color, intensity) => {
 //   scene.add(light2);
 // };
 
-const setupLights = (type, position, colorRGB, distance, intensity, decay) => {
-  switch (type) {
-    case "ambientLight":
-      addAmbientLight(scene, position, colorRGB, distance, intensity, decay);
-    case "directionalLight":
+// const setupLights = (type, position, colorRGB, distance, intensity, decay) => {
+//   switch (type) {
+//     case "ambientLight":
+//       addAmbientLight(scene, position, colorRGB, distance, intensity, decay);
+//     case "directionalLight":
 
-    case "hemisphereLight":
+//     case "hemisphereLight":
 
-    case "spotLight":
+//     case "spotLight":
 
-    case "pointLight":
-  }
-};
+//     case "pointLight":
+//   }
+// };
 
 const animate = () => {
   requestAnimationFrame(animate);
