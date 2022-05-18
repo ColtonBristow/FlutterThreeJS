@@ -113,8 +113,9 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
           InternetAddress address = snapshot.data as InternetAddress;
           log('started local server http://${address.address}:$port');
           return WebView(
+            allowsInlineMediaPlayback: true,
             // ignore: prefer_collection_literals
-            gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+            gestureRecognizers: [
               Factory<OneSequenceGestureRecognizer>(
                 () => EagerGestureRecognizer(),
               ),
@@ -135,19 +136,21 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
                 log("calling js");
               }
 
-              widget.controller.setupScene(widget.debug ?? false);
-              widget.controller.createCamera(widget.cameraConfig ?? PerspectiveCameraConfig(fov: 75, aspectRatio: null, far: 10000, near: 0.1));
-              widget.controller.createOrbitControls(
-                widget.orbitControls ??
-                    OrbitControls(
-                      minDistance: 3,
-                      maxDistance: 500,
-                      autoRotateSpeed: 2.5,
-                    ),
-              );
-              widget.controller.loadModels(widget.models);
-              widget.controller.addAmbientLight('0xff0000', 1);
-              widget.onPageFinishedLoading;
+              Future.delayed(const Duration(milliseconds: 200), () {
+                widget.controller.setupScene(widget.debug ?? false);
+                widget.controller.createCamera(widget.cameraConfig ?? PerspectiveCameraConfig(fov: 75, aspectRatio: null, far: 10000, near: 0.1));
+                widget.controller.createOrbitControls(
+                  widget.orbitControls ??
+                      OrbitControls(
+                        minDistance: 3,
+                        maxDistance: 500,
+                        autoRotateSpeed: 2.5,
+                      ),
+                );
+                widget.controller.loadModels(widget.models);
+                widget.controller.addAmbientLight('0xff0000', 1);
+                widget.onPageFinishedLoading;
+              });
             },
             javascriptChannels: channels,
             onWebResourceError: (error) {
@@ -158,4 +161,52 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
       },
     );
   }
+}
+
+class PlatformViewVerticalGestureRecognizer extends VerticalDragGestureRecognizer {
+  PlatformViewVerticalGestureRecognizer({
+    Object? debugOwner,
+    @Deprecated(
+      'Migrate to supportedDevices. '
+      'This feature was deprecated after v2.3.0-1.0.pre.',
+    )
+        PointerDeviceKind? kind,
+    Set<PointerDeviceKind>? supportedDevices,
+  }) : super(
+          debugOwner: debugOwner,
+          kind: kind,
+          supportedDevices: supportedDevices,
+        );
+
+  Offset _dragDistance = Offset.zero;
+
+  @override
+  void addPointer(PointerEvent event) {
+    startTrackingPointer(event.pointer);
+  }
+
+  @override
+  void handleEvent(PointerEvent event) {
+    _dragDistance = _dragDistance + event.delta;
+    if (event is PointerMoveEvent) {
+      final double dy = _dragDistance.dy.abs();
+      final double dx = _dragDistance.dx.abs();
+
+      if (dy > dx && dy > kTouchSlop) {
+        // vertical drag - accept
+        resolve(GestureDisposition.accepted);
+        _dragDistance = Offset.zero;
+      } else if (dx > kTouchSlop && dx > dy) {
+        // horizontal drag - stop tracking
+        stopTrackingPointer(event.pointer);
+        _dragDistance = Offset.zero;
+      }
+    }
+  }
+
+  @override
+  String get debugDescription => 'horizontal drag (platform view)';
+
+  @override
+  void didStopTrackingLastPointer(int pointer) {}
 }

@@ -48,7 +48,7 @@ class ModelView extends StatelessWidget {
         },
         models: [
           ThreeModel(
-            src: 'https://imgprd21.museumofthebible.org/mobileapi/models/GreatBibleWoodenCover.glb',
+            src: 'https://userbob.com/motb/woodenBible/GreatBibleWoodenCover.glb',
             playAnimation: false,
           ),
         ],

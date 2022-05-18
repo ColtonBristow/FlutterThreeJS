@@ -11,7 +11,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   threeJS_Viewer:
     path: ../threeJS_Viewer
-  webview_flutter: ^3.0.2
+  webview_flutter: ^3.0.4
 
 dev_dependencies:
   flutter_test:
