@@ -23,7 +23,7 @@ const setupScene = (_debug) => {
         const s = Stats();
         document.body.appendChild(s.dom);
         stats = s.dom;
-        globalThis.Print.postMessage('Scene Created with stats... 10%');
+        window.Print.postMessage('Scene Created with stats... 10%');
     }
 };
 const loadCam = (modelURL) => {
@@ -153,7 +153,7 @@ const loadModel = (modelUrl, playAnimation) => {
         });
     });
 };
-globalThis.setupScene = setupScene;
+window.setupScene = setupScene;
 globalThis.setOrbitControls = setOrbitControls;
 globalThis.setControlsTarget = setControlsTarget;
 globalThis.loadModel = loadModel;

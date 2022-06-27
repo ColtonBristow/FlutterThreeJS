@@ -48,7 +48,7 @@ const setupScene = (_debug: boolean) => {
     document.body.appendChild(s.dom);
     stats = s.dom;
 
-    globalThis.Print.postMessage('Scene Created with stats... 10%');
+    (window as any).Print.postMessage('Scene Created with stats... 10%');
   }
 };
 
@@ -219,7 +219,7 @@ const loadModel = (modelUrl: string, playAnimation: boolean) => {
   });
 };
 
-globalThis.setupScene = setupScene;
+(window as any).setupScene = setupScene;
 globalThis.setOrbitControls = setOrbitControls;
 globalThis.setControlsTarget = setControlsTarget;
 globalThis.loadModel = loadModel;
