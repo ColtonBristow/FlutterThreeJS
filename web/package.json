@@ -1,16 +1,16 @@
 {
-  "name": "3d-view",
-  "version": "0.0.0",
+  "name": "flutter_threejs_web",
+  "version": "1.0.0",
+  "description": "flutter and three js shtuff",
+  "main": "index.ts",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build --config vite.config.js",
-    "preview": "vite preview"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "devDependencies": {
-    "vite": "^2.7.2"
-  },
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "gl-matrix": "^3.4.3",
-    "three": "^0.135.0"
+    "@types/three": "^0.141.0",
+    "three": "^0.141.0",
+    "three-gltf-loader": "^1.111.0"
   }
 }
