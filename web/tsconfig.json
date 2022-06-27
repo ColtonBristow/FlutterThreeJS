@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "outDir": "../threeJS_Viewer/web",
+    "target": "es2015"
+  }
+}
