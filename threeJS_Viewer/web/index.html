@@ -4,9 +4,10 @@
     <meta charset="UTF-8" />
     <base href="./" />
     <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <metal http-equiv="X-UA-Compatible" content="ie=edge" />
+		<metal http-equiv="X-UA-Compatible" content="ie=edge" />
     <link rel="icon" href="data:," />
     <title>Model Viewer</title>
+    <script type="module" crossorigin src="/index.js"></script>
   </head>
 
   <body>
@@ -16,17 +17,17 @@
       }
     </style>
 
-    <script crossorigin="anonymous" type="module" src="./index.js"></script>
+    
 
     <script>
       //======>   EVENTS  <======//
-      globalThis.onObjectLoading = (percentage) => {
+      window.onObjectLoading = (percentage) => {
         try {
           OnObjectLoading.postMessage(`error on loading ${percentage}`);
         } catch (error) {}
       };
 
-      globalThis.onLoadError = (error) => {
+      window.onLoadError = (error) => {
         try {
           OnLoadError.postMessage(`error on load ${error}`);
         } catch (error) {}
