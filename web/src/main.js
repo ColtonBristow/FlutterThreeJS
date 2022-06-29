@@ -1,4 +1,4 @@
-import { AnimationMixer, WebGLRenderer, AmbientLight, Scene, PerspectiveCamera, Clock, DirectionalLight, sRGBEncoding, GridHelper, AxesHelper } from "three";
+import { AnimationMixer, WebGLRenderer, AmbientLight, Scene, PerspectiveCamera, Clock, DirectionalLight, sRGBEncoding, GridHelper, AxesHelper, Object3D, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -6,7 +6,10 @@ import Stats from "three/examples/jsm/libs/stats.module";
 
 let scene, camera, clock, renderer, mixer, controls, loader, stats, debug;
 
-const setupScene = (_debug) => {
+let shouldDemoControls = true;
+
+const setupScene = (_debug) => { 
+  //window.Print.postMessage("setupScene() called");
   debug = _debug ?? false;
   scene = new Scene();
   clock = new Clock();
@@ -32,12 +35,15 @@ const setupScene = (_debug) => {
 };
 
 const createPerspectiveCamera = (fov, aspectRatio, near, far) => {
+  window.Print.postMessage("createPerspectiveCamera() called");
   camera = new PerspectiveCamera(fov, aspectRatio != null ? aspectRatio : window.innerWidth / window.innerHeight, near, far);
   window.camera = camera;
   animate();
 };
 
 const setOrbitControls = (polMin, polMax, azMin, azMax, minDistance, maxDistance, enablePan, autoRotateSpeed, autoRotate, enableZoom, c) => {
+  window.Print.postMessage("setOrbitControls() called");
+  shouldDemoControls = autoRotate;
   controls = new OrbitControls(c ?? camera, renderer.domElement);
   controls.target.set(0, 0, 0);
 
@@ -53,17 +59,25 @@ const setOrbitControls = (polMin, polMax, azMin, azMax, minDistance, maxDistance
   controls.autoRotate = autoRotate != null ? autoRotate : false;
   controls.enableZoom = enableZoom != null ? enableZoom : true;
 
+  controls.addEventListener("start", function() {
+    controls.autoRotate = false;
+    shouldDemoControls = false;
+  });
+
   controls.update();
   animate();
+  setCameraPosition(0,0,5);
   window.controls = controls;
 };
 
 const setControlsTarget = (x, y, z) => {
+  window.Print.postMessage("setControlsTarget() called");
   controls.target.set(x, y, z);
   controls.update();
 };
 
 const addGridHelper = () => {
+  window.Print.postMessage("addGridHelper() called");
   var helper = new GridHelper(100, 100);
   helper.rotation.x = Math.PI / 2;
   helper.material.opacity = 1;
@@ -75,16 +89,19 @@ const addGridHelper = () => {
 };
 
 const setCameraPosition = (x, y, z) => {
+  window.Print.postMessage("setCameraPosition() called");
   camera.position.set(x, y, z);
   controls.update();
 };
 
 const setCameraRotation = (x, y, z) => {
+  window.Print.postMessage("setCameraRotation() called");
   camera.rotation.set(x, y, z);
   controls.update();
 };
 
 const loadModel = (modelUrl, playAnimation) => {
+  window.Print.postMessage("loadModel() called");
   return new Promise((res, rej) => {
     // Instantiate a loader
     loader = new GLTFLoader();
@@ -99,7 +116,7 @@ const loadModel = (modelUrl, playAnimation) => {
     // Load a glTF resource
     loader.load(
       // resource URL
-      modelUrl,
+      "https://warm-mesa-43639.herokuapp.com/" + modelUrl,
       // called when the resource is loaded
       function (gltf) {
         if (playAnimation) {
@@ -136,6 +153,7 @@ const loadModel = (modelUrl, playAnimation) => {
 };
 
 const loadCam = (modelUrl) => {
+  window.Print.postMessage("loadCam() called");
   return new Promise((res, rej) => {
     // Instantiate a loader
     loader = new GLTFLoader();
@@ -174,6 +192,7 @@ const loadCam = (modelUrl) => {
 };
 
 const addAmbientLight = (color, intensity) => {
+  window.Print.postMessage("addAmbientLight() called");
   const ambient = new AmbientLight(color, intensity);
   scene.add(ambient);
 };
@@ -198,13 +217,29 @@ const addAmbientLight = (color, intensity) => {
 //   }
 // };
 
+const zoomValues = {
+  5: 0.01,
+  6: 0.02,
+  7: 0.03,
+  8: 0.04,
+  9: 0.04,
+  10: 0.03,
+  11: 0.02,
+  12: 0.01
+}
+
+let movingAway = true;
 const animate = () => {
+  window.Print.postMessage("animate() called");
   requestAnimationFrame(animate);
   var delta = clock.getDelta();
   if (mixer) mixer.update(delta);
   if (controls) controls.update();
   renderer.render(scene, camera);
   //   if (debug) stats.update();
+  if(camera && controls && shouldDemoControls){
+    camera.position.z += 0.005;
+  }
 };
 
 window.setupScene = setupScene;

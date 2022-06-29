@@ -48,7 +48,7 @@ class ModelView extends StatelessWidget {
         },
         models: [
           ThreeModel(
-            src: 'http://10.160.34.215/mobileapi/assets/artifacts/NoravankKhachkar/bigKhachkar.glb',
+            src: 'https://dfoxw2i5wdgo8.cloudfront.net/mobile/request/GreatBibleWoodenCover.glb',
             playAnimation: false,
           ),
         ],

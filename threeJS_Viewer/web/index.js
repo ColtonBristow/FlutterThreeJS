@@ -27334,6 +27334,7 @@ Stats.Panel = function(name, fg, bg) {
   };
 };
 let scene, camera, clock, renderer, mixer, controls, loader, debug;
+let shouldDemoControls = true;
 const setupScene = (_debug) => {
   debug = _debug != null ? _debug : false;
   scene = new Scene();
@@ -27353,11 +27354,14 @@ const setupScene = (_debug) => {
   }
 };
 const createPerspectiveCamera = (fov2, aspectRatio, near, far) => {
+  window.Print.postMessage("createPerspectiveCamera() called");
   camera = new PerspectiveCamera(fov2, aspectRatio != null ? aspectRatio : window.innerWidth / window.innerHeight, near, far);
   window.camera = camera;
   animate();
 };
 const setOrbitControls = (polMin, polMax, azMin, azMax, minDistance, maxDistance, enablePan, autoRotateSpeed, autoRotate, enableZoom, c) => {
+  window.Print.postMessage("setOrbitControls() called");
+  shouldDemoControls = autoRotate;
   controls = new OrbitControls(c != null ? c : camera, renderer.domElement);
   controls.target.set(0, 0, 0);
   controls.minPolarAngle = polMin != null ? polMin : -Infinity;
@@ -27370,15 +27374,22 @@ const setOrbitControls = (polMin, polMax, azMin, azMax, minDistance, maxDistance
   controls.autoRotateSpeed = autoRotateSpeed != null ? autoRotateSpeed : 0;
   controls.autoRotate = autoRotate != null ? autoRotate : false;
   controls.enableZoom = enableZoom != null ? enableZoom : true;
+  controls.addEventListener("start", function() {
+    controls.autoRotate = false;
+    shouldDemoControls = false;
+  });
   controls.update();
   animate();
+  setCameraPosition(0, 0, 5);
   window.controls = controls;
 };
 const setControlsTarget = (x, y, z) => {
+  window.Print.postMessage("setControlsTarget() called");
   controls.target.set(x, y, z);
   controls.update();
 };
 const addGridHelper = () => {
+  window.Print.postMessage("addGridHelper() called");
   var helper = new GridHelper(100, 100);
   helper.rotation.x = Math.PI / 2;
   helper.material.opacity = 1;
@@ -27388,21 +27399,24 @@ const addGridHelper = () => {
   scene.add(axis);
 };
 const setCameraPosition = (x, y, z) => {
+  window.Print.postMessage("setCameraPosition() called");
   camera.position.set(x, y, z);
   controls.update();
 };
 const setCameraRotation = (x, y, z) => {
+  window.Print.postMessage("setCameraRotation() called");
   camera.rotation.set(x, y, z);
   controls.update();
 };
 const loadModel = (modelUrl, playAnimation) => {
+  window.Print.postMessage("loadModel() called");
   return new Promise((res, rej) => {
     loader = new GLTFLoader();
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath("decoder/");
     dracoLoader.setDecoderConfig({ type: "js" });
     loader.setDRACOLoader(dracoLoader);
-    loader.load(modelUrl, function(gltf) {
+    loader.load("https://warm-mesa-43639.herokuapp.com/" + modelUrl, function(gltf) {
       if (playAnimation) {
         mixer = new AnimationMixer(gltf.scene);
         const action = mixer.clipAction(gltf.animations[0]);
@@ -27430,6 +27444,7 @@ const loadModel = (modelUrl, playAnimation) => {
   });
 };
 const loadCam = (modelUrl) => {
+  window.Print.postMessage("loadCam() called");
   return new Promise((res, rej) => {
     loader = new GLTFLoader();
     const dracoLoader = new DRACOLoader();
@@ -27451,10 +27466,12 @@ const loadCam = (modelUrl) => {
   });
 };
 const addAmbientLight = (color, intensity) => {
+  window.Print.postMessage("addAmbientLight() called");
   const ambient = new AmbientLight(color, intensity);
   scene.add(ambient);
 };
 const animate = () => {
+  window.Print.postMessage("animate() called");
   requestAnimationFrame(animate);
   var delta = clock.getDelta();
   if (mixer)
@@ -27462,6 +27479,9 @@ const animate = () => {
   if (controls)
     controls.update();
   renderer.render(scene, camera);
+  if (camera && controls && shouldDemoControls) {
+    camera.position.z += 5e-3;
+  }
 };
 window.setupScene = setupScene;
 window.setOrbitControls = setOrbitControls;
