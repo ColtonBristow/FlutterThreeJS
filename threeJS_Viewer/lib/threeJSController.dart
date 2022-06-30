@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:threeJS_Viewer/threeJSModelViewer.dart';
 
+//! TODO: Make all javascript methods return results to improve debug quality in flutter
+
 class ThreeJSController {
   WebViewController? webController;
   bool? debug;
@@ -11,41 +13,43 @@ class ThreeJSController {
     required this.webController,
   });
 
-  void setupScene(bool debug) {
-    webController?.runJavascript('window.setupScene($debug)');
+  Future<String?> setupScene(bool debug) async {
+    Future<String>? result = webController?.runJavascriptReturningResult('window.setupScene($debug)');
+
+    return result;
   }
 
-  void loadModels(List<ThreeModel> models) async {
+  Future<void> loadModels(List<ThreeModel> models) async {
     for (var model in models) {
       if (kDebugMode) {
         log("trying to load the following model: ${model.src}");
       }
-      webController?.runJavascript('window.loadModel(\'${model.src}\', ${model.playAnimation})');
+      await webController?.runJavascript('window.loadModel(\'${model.src}\', ${model.playAnimation})');
     }
   }
 
-  void createCamera(PerspectiveCameraConfig camera) {
+  Future<void> createCamera(PerspectiveCameraConfig camera) async {
     if (kDebugMode) {
       log('trying to create a camera with the following properties: ${camera.toString()}');
     }
 
     //TODO: make multiple camera configs and the option to add multiple cameras for transitions
-    webController?.runJavascript('window.createPerspectiveCamera($camera)');
+    await webController?.runJavascript('window.createPerspectiveCamera($camera)');
   }
 
-  void createOrbitControls(OrbitControls oc) {
+  Future<void> createOrbitControls(OrbitControls oc) async {
     if (kDebugMode) {
       log('trying to add the following controls ${oc.toString()}');
     }
 
-    webController?.runJavascript('window.setOrbitControls(${oc.toString()})');
+    await webController?.runJavascript('window.setOrbitControls(${oc.toString()})');
   }
 
-  void addAmbientLight(String color, int intensity) {
-    webController?.runJavascript('window.addAmbientLight(\'$color\', $intensity)');
+  Future<void> addAmbientLight(String color, int intensity) async {
+    await webController?.runJavascript('window.addAmbientLight(\'$color\', $intensity)');
   }
 
-  void addDirectionalLight(DirectionalLight light) {
-    webController?.runJavascript('window.addDirectionalLight(${light.toString(map: true)})');
+  Future<void> addDirectionalLight(DirectionalLight light) async {
+    await webController?.runJavascript('window.addDirectionalLight(${light.toString(map: true)})');
   }
 }

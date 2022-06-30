@@ -30,8 +30,10 @@ const setupScene = (_debug) => {
     document.body.appendChild(s.dom);
     stats = s.dom;
 
-    window.Print.postMessage("Scene Created with stats... 10%");
+    window.Completer.postMessage("Scene Created with stats");
   }
+
+  return true;
 };
 
 const createPerspectiveCamera = (fov, aspectRatio, near, far) => {
@@ -100,7 +102,7 @@ const setCameraRotation = (x, y, z) => {
   controls.update();
 };
 
-const loadModel = (modelUrl, playAnimation) => {
+const loadModel = async (modelUrl, playAnimation) => {
   window.Print.postMessage("loadModel() called");
   return new Promise((res, rej) => {
     // Instantiate a loader
@@ -114,7 +116,7 @@ const loadModel = (modelUrl, playAnimation) => {
     //TODO: add cross origin and header control
 
     // Load a glTF resource
-    loader.load(
+   loader.load(
       // resource URL
       "https://warm-mesa-43639.herokuapp.com/" + modelUrl,
       // called when the resource is loaded
@@ -217,18 +219,6 @@ const addAmbientLight = (color, intensity) => {
 //   }
 // };
 
-const zoomValues = {
-  5: 0.01,
-  6: 0.02,
-  7: 0.03,
-  8: 0.04,
-  9: 0.04,
-  10: 0.03,
-  11: 0.02,
-  12: 0.01
-}
-
-let movingAway = true;
 const animate = () => {
   window.Print.postMessage("animate() called");
   requestAnimationFrame(animate);

@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:local_assets_server/local_assets_server.dart';
 import 'package:threeJS_Viewer/threeJSController.dart';
 import 'package:threeJS_Viewer/threeJSModelViewer.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 // ignore: must_be_immutable
 class ThreeJSViewer extends StatefulWidget {
@@ -47,7 +46,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
   Set<JavascriptChannel> channels = {};
   Future<InternetAddress>? server;
 
-  initServer() async {
+  Future<InternetAddress>? initServer() async {
     if (widget.addressServer == null) {
       final las = LocalAssetsServer(
         port: 4000,
@@ -56,9 +55,9 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
         logger: const DebugLogger(),
       );
 
-      server = las.serve();
+      return await las.serve();
     } else {
-      server = widget.addressServer?.serve();
+      return await widget.addressServer!.serve();
     }
   }
 
@@ -81,15 +80,13 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
         onMessageReceived: (JavascriptMessage message) {
           log("from three js: ${message.message}");
         },
-      )
+      ),
     };
   }
 
   @override
   initState() {
     if (Platform.isAndroid) WebView.platform = AndroidWebView();
-
-    initServer();
     initChannels();
     super.initState();
   }
@@ -102,6 +99,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
 
   @override
   Widget build(BuildContext context) {
+    server ??= initServer();
     return FutureBuilder(
       future: server,
       builder: (context, snapshot) {
@@ -128,7 +126,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
               widget.controllerCompleter?.complete(c);
               widget.controller = ThreeJSController(webController: c);
             },
-            onPageFinished: (details) {
+            onPageFinished: (details) async {
               if (widget.controller.webController == null && kDebugMode) {
                 log('widget TJScontroller:  ${widget.controller.toString()} \n widget WVController: + ${widget.controller.webController.toString()}');
               }
@@ -136,22 +134,22 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
                 log("calling js");
               }
 
-              Future.delayed(const Duration(milliseconds: 200), () {
+              //! TODO: Fix this ish related to javascript not compiling in time
+              await Future.delayed(const Duration(milliseconds: 500), () {
                 widget.controller.setupScene(widget.debug ?? false);
-                widget.controller.createCamera(widget.cameraConfig ??
-                    PerspectiveCameraConfig(fov: 75, aspectRatio: null, far: 10000, near: 0.1));
-                widget.controller.createOrbitControls(
-                  widget.orbitControls ??
-                      OrbitControls(
-                        minDistance: 3,
-                        maxDistance: 500,
-                        autoRotateSpeed: 2.5,
-                      ),
-                );
-                widget.controller.loadModels(widget.models);
-                widget.controller.addAmbientLight('0xff0000', 1);
-                widget.onPageFinishedLoading;
               });
+              widget.controller.createCamera(widget.cameraConfig ?? PerspectiveCameraConfig(fov: 75, aspectRatio: null, far: 10000, near: 0.1));
+              widget.controller.createOrbitControls(
+                widget.orbitControls ??
+                    OrbitControls(
+                      minDistance: 3,
+                      maxDistance: 500,
+                      autoRotateSpeed: 2.5,
+                    ),
+              );
+              widget.controller.loadModels(widget.models);
+              widget.controller.addAmbientLight('0xff0000', 1);
+              widget.onPageFinishedLoading;
             },
             javascriptChannels: channels,
             onWebResourceError: (error) {
