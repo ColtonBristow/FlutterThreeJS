@@ -27483,12 +27483,27 @@ const animate = () => {
     camera.position.z += 5e-3;
   }
 };
+const recreateControlsInstance = (autoRotate) => {
+  JavascriptChannel.postMessage("recreateControlsInstance() called");
+  controls.dispose();
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enablePan = false;
+  controls.touches.ONE = THREE.TOUCH.ROTATE;
+  controls.minDistance = 3;
+  controls.maxDistance = 500;
+  controls.addEventListener("start", () => {
+    shouldPreviewControls = autoRotate != null ? autoRotate : false;
+  });
+  controls.update();
+  controls.saveState();
+};
 window.setupScene = setupScene;
 window.setOrbitControls = setOrbitControls;
 window.setControlsTarget = setControlsTarget;
 window.loadModel = loadModel;
 window.addAmbientLight = addAmbientLight;
 window.loadCam = loadCam;
+window.resetControls = recreateControlsInstance;
 window.addGridHelper = addGridHelper;
 window.setCameraPosition = setCameraPosition;
 window.setCameraRotation = setCameraRotation;

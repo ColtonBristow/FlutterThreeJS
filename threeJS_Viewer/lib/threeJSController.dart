@@ -48,4 +48,8 @@ class ThreeJSController {
   void addDirectionalLight(DirectionalLight light) {
     webController?.runJavascript('window.addDirectionalLight(${light.toString(map: true)})');
   }
+
+  void resetCameraControls({autoRotate = bool}) {
+    webController?.runJavascript('resetCameraControls(${autoRotate ?? true})');
+  }
 }
