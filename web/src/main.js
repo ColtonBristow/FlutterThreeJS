@@ -1,14 +1,27 @@
-import { AnimationMixer, WebGLRenderer, AmbientLight, Scene, PerspectiveCamera, Clock, DirectionalLight, sRGBEncoding, GridHelper, AxesHelper, Object3D, Vector3 } from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import Stats from "three/examples/jsm/libs/stats.module";
+import {
+  AnimationMixer,
+  WebGLRenderer,
+  AmbientLight,
+  Scene,
+  PerspectiveCamera,
+  Clock,
+  DirectionalLight,
+  sRGBEncoding,
+  GridHelper,
+  AxesHelper,
+  Object3D,
+  Vector3,
+} from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import Stats from 'three/examples/jsm/libs/stats.module';
 
 let scene, camera, clock, renderer, mixer, controls, loader, stats, debug;
 
 let shouldDemoControls = true;
 
-const setupScene = (_debug) => { 
+const setupScene = (_debug) => {
   //window.Print.postMessage("setupScene() called");
   debug = _debug ?? false;
   scene = new Scene();
@@ -30,21 +43,38 @@ const setupScene = (_debug) => {
     document.body.appendChild(s.dom);
     stats = s.dom;
 
-    window.Completer.postMessage("Scene Created with stats");
+    window.Print.postMessage('Scene Created with stats... 10%');
   }
 
   return true;
 };
 
 const createPerspectiveCamera = (fov, aspectRatio, near, far) => {
-  window.Print.postMessage("createPerspectiveCamera() called");
-  camera = new PerspectiveCamera(fov, aspectRatio != null ? aspectRatio : window.innerWidth / window.innerHeight, near, far);
+  window.Print.postMessage('createPerspectiveCamera() called');
+  camera = new PerspectiveCamera(
+    fov,
+    aspectRatio != null ? aspectRatio : window.innerWidth / window.innerHeight,
+    near,
+    far
+  );
   window.camera = camera;
   animate();
 };
 
-const setOrbitControls = (polMin, polMax, azMin, azMax, minDistance, maxDistance, enablePan, autoRotateSpeed, autoRotate, enableZoom, c) => {
-  window.Print.postMessage("setOrbitControls() called");
+const setOrbitControls = (
+  polMin,
+  polMax,
+  azMin,
+  azMax,
+  minDistance,
+  maxDistance,
+  enablePan,
+  autoRotateSpeed,
+  autoRotate,
+  enableZoom,
+  c
+) => {
+  window.Print.postMessage('setOrbitControls() called');
   shouldDemoControls = autoRotate;
   controls = new OrbitControls(c ?? camera, renderer.domElement);
   controls.target.set(0, 0, 0);
@@ -61,25 +91,25 @@ const setOrbitControls = (polMin, polMax, azMin, azMax, minDistance, maxDistance
   controls.autoRotate = autoRotate != null ? autoRotate : false;
   controls.enableZoom = enableZoom != null ? enableZoom : true;
 
-  controls.addEventListener("start", function() {
+  controls.addEventListener('start', function () {
     controls.autoRotate = false;
     shouldDemoControls = false;
   });
 
   controls.update();
   animate();
-  setCameraPosition(0,0,5);
+  setCameraPosition(0, 0, 5);
   window.controls = controls;
 };
 
 const setControlsTarget = (x, y, z) => {
-  window.Print.postMessage("setControlsTarget() called");
+  window.Print.postMessage('setControlsTarget() called');
   controls.target.set(x, y, z);
   controls.update();
 };
 
 const addGridHelper = () => {
-  window.Print.postMessage("addGridHelper() called");
+  window.Print.postMessage('addGridHelper() called');
   var helper = new GridHelper(100, 100);
   helper.rotation.x = Math.PI / 2;
   helper.material.opacity = 1;
@@ -91,34 +121,34 @@ const addGridHelper = () => {
 };
 
 const setCameraPosition = (x, y, z) => {
-  window.Print.postMessage("setCameraPosition() called");
+  window.Print.postMessage('setCameraPosition() called');
   camera.position.set(x, y, z);
   controls.update();
 };
 
 const setCameraRotation = (x, y, z) => {
-  window.Print.postMessage("setCameraRotation() called");
+  window.Print.postMessage('setCameraRotation() called');
   camera.rotation.set(x, y, z);
   controls.update();
 };
 
-const loadModel = async (modelUrl, playAnimation) => {
-  window.Print.postMessage("loadModel() called");
+const loadModel = (modelUrl, playAnimation) => {
+  window.Print.postMessage('loadModel() called');
   return new Promise((res, rej) => {
     // Instantiate a loader
     loader = new GLTFLoader();
 
     // Optional: Provide a DRACOLoader instance to decode compressed mesh data
     const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath("decoder/");
-    dracoLoader.setDecoderConfig({ type: "js" });
+    dracoLoader.setDecoderPath('decoder/');
+    dracoLoader.setDecoderConfig({ type: 'js' });
     loader.setDRACOLoader(dracoLoader);
     //TODO: add cross origin and header control
 
     // Load a glTF resource
    loader.load(
       // resource URL
-      "https://warm-mesa-43639.herokuapp.com/" + modelUrl,
+      'https://warm-mesa-43639.herokuapp.com/' + modelUrl,
       // called when the resource is loaded
       function (gltf) {
         if (playAnimation) {
@@ -136,18 +166,18 @@ const loadModel = async (modelUrl, playAnimation) => {
 
         res(gltf);
         if (debug) {
-          window.Print.postMessage("loaded the following: " + modelUrl);
+          window.Print.postMessage('loaded the following: ' + modelUrl);
         }
       },
       // called while loading is progressing
       (xhr) => {
-        console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+        console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
         window.onObjectLoading((xhr.loaded / xhr.total) * 100);
       },
       // called when loading has errors
       (error) => {
-        console.log("An error happened", error);
-        window.onLoadError("on loading error: " + error);
+        console.log('An error happened', error);
+        window.onLoadError('on loading error: ' + error);
         rej(error);
       }
     );
@@ -155,15 +185,15 @@ const loadModel = async (modelUrl, playAnimation) => {
 };
 
 const loadCam = (modelUrl) => {
-  window.Print.postMessage("loadCam() called");
+  window.Print.postMessage('loadCam() called');
   return new Promise((res, rej) => {
     // Instantiate a loader
     loader = new GLTFLoader();
 
     // Optional: Provide a DRACOLoader instance to decode compressed mesh data
     const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath("decoder/");
-    dracoLoader.setDecoderConfig({ type: "js" });
+    dracoLoader.setDecoderPath('decoder/');
+    dracoLoader.setDecoderConfig({ type: 'js' });
     loader.setDRACOLoader(dracoLoader);
 
     // Load a glTF resource
@@ -180,12 +210,12 @@ const loadCam = (modelUrl) => {
       },
       // called while loading is progressing
       (xhr) => {
-        console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+        console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
         window.onObjectLoading((xhr.loaded / xhr.total) * 100);
       },
       // called when loading has errors
       (error) => {
-        console.log("An error happened", error);
+        console.log('An error happened', error);
         window.onLoadError(error);
         rej(error);
       }
@@ -194,7 +224,7 @@ const loadCam = (modelUrl) => {
 };
 
 const addAmbientLight = (color, intensity) => {
-  window.Print.postMessage("addAmbientLight() called");
+  window.Print.postMessage('addAmbientLight() called');
   const ambient = new AmbientLight(color, intensity);
   scene.add(ambient);
 };
@@ -220,16 +250,33 @@ const addAmbientLight = (color, intensity) => {
 // };
 
 const animate = () => {
-  window.Print.postMessage("animate() called");
+  window.Print.postMessage('animate() called');
   requestAnimationFrame(animate);
   var delta = clock.getDelta();
   if (mixer) mixer.update(delta);
   if (controls) controls.update();
   renderer.render(scene, camera);
   //   if (debug) stats.update();
-  if(camera && controls && shouldDemoControls){
+  if (camera && controls && shouldDemoControls) {
     camera.position.z += 0.005;
   }
+};
+
+const recreateControlsInstance = (autoRotate) => {
+  JavascriptChannel.postMessage('recreateControlsInstance() called');
+  controls.dispose();
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enablePan = false;
+  controls.touches.ONE = THREE.TOUCH.ROTATE;
+  controls.minDistance = 3;
+  controls.maxDistance = 500;
+
+  controls.addEventListener('start', () => {
+    shouldPreviewControls = autoRotate ?? false;
+  });
+
+  controls.update();
+  controls.saveState();
 };
 
 window.setupScene = setupScene;
@@ -238,7 +285,7 @@ window.setControlsTarget = setControlsTarget;
 window.loadModel = loadModel;
 window.addAmbientLight = addAmbientLight;
 window.loadCam = loadCam;
-// window.setupLights = setupLights;
+window.resetCameraControls = recreateControlsInstance;
 window.addGridHelper = addGridHelper;
 window.setCameraPosition = setCameraPosition;
 window.setCameraRotation = setCameraRotation;
