@@ -34,7 +34,7 @@ const setupScene = (_debug) => {
   renderer.shadowMap.enabled = true;
   renderer.physicallyCorrectLights = true;
   renderer.outputEncoding = sRGBEncoding;
-  renderer.setClearColor(0xcccccc);
+  renderer.setClearColor(0xcccccc, 0);
 
   document.body.appendChild(renderer.domElement);
 
