@@ -47,7 +47,9 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
   Future<InternetAddress>? server;
 
   Future<InternetAddress>? initServer() async {
+    print("initServer() run");
     if (widget.addressServer == null) {
+      print("widget.addressServer == null");
       final las = LocalAssetsServer(
         port: 4000,
         address: InternetAddress.loopbackIPv4,
@@ -57,6 +59,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
 
       return await las.serve();
     } else {
+      print("widget.addressServer != null");
       return await widget.addressServer!.serve();
     }
   }
