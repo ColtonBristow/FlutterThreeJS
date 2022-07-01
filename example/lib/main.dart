@@ -26,33 +26,36 @@ class ModelView extends StatelessWidget {
     ThreeJSController controller = ThreeJSController(webController: webViewController);
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.animation),
-        focusColor: Colors.red,
-        backgroundColor: Colors.redAccent,
-        onPressed: () {},
-      ),
-      appBar: AppBar(
-        title: Text("ThreeJSViewer"),
-        backgroundColor: Colors.redAccent,
-      ),
-      body: ThreeJSViewer(
-        debug: true,
-        controller: controller,
-        onError: (details) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(details.description),
-            ),
-          );
-        },
-        models: [
-          ThreeModel(
-            src: 'https://dfoxw2i5wdgo8.cloudfront.net/mobile/request/GreatBibleWoodenCover.glb',
-            playAnimation: false,
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.animation),
+          focusColor: Colors.red,
+          backgroundColor: Colors.redAccent,
+          onPressed: () {},
+        ),
+        appBar: AppBar(
+          title: Text("ThreeJSViewer"),
+          backgroundColor: Colors.redAccent,
+        ),
+        body: Container(
+          color: Colors.black,
+          child: ThreeJSViewer(
+            debug: true,
+            controller: controller,
+            onError: (details) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(details.description),
+                ),
+              );
+            },
+            models: [
+              ThreeModel(
+                src:
+                    'https://dfoxw2i5wdgo8.cloudfront.net/mobile/request/GreatBibleWoodenCover.glb',
+                playAnimation: false,
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 }

@@ -18,6 +18,7 @@ class ThreeJSViewer extends StatefulWidget {
   PerspectiveCameraConfig? cameraConfig;
   LocalAssetsServer? addressServer;
   OrbitControls? orbitControls;
+  int? port;
   bool? debug;
   List<ThreeModel> models;
   Completer<WebViewController>? controllerCompleter;
@@ -25,6 +26,7 @@ class ThreeJSViewer extends StatefulWidget {
   ThreeJSViewer({
     Key? key,
     required this.controller,
+    this.port,
     this.orbitControls,
     this.onPageFinishedLoading,
     this.channels,
@@ -42,7 +44,6 @@ class ThreeJSViewer extends StatefulWidget {
 
 class _ThreeJSViewerState extends State<ThreeJSViewer> {
   double loadingProgress = 0;
-  int port = 4000;
   Set<JavascriptChannel> channels = {};
   Future<InternetAddress>? server;
 
@@ -103,6 +104,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
   @override
   Widget build(BuildContext context) {
     server ??= initServer();
+
     return FutureBuilder(
       future: server,
       builder: (context, snapshot) {
@@ -112,7 +114,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
           );
         } else {
           InternetAddress address = snapshot.data as InternetAddress;
-          log('started local server http://${address.address}:$port');
+          log('started local server http://${address.address}:${widget.port ?? 8080}');
           return WebView(
             allowsInlineMediaPlayback: true,
             // ignore: prefer_collection_literals
@@ -123,7 +125,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
             ].toSet(),
             debuggingEnabled: true,
             backgroundColor: Colors.transparent,
-            initialUrl: 'http://${address.address}:$port',
+            initialUrl: 'http://${address.address}:${widget.port ?? 8080}',
             javascriptMode: JavascriptMode.unrestricted,
             onWebViewCreated: (c) {
               widget.controllerCompleter?.complete(c);
@@ -138,10 +140,10 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
               }
 
               //! TODO: Fix this ish related to javascript not compiling in time
-              await Future.delayed(const Duration(milliseconds: 500), () {
-                widget.controller.setupScene(widget.debug ?? false);
-              });
-              widget.controller.createCamera(widget.cameraConfig ?? PerspectiveCameraConfig(fov: 75, aspectRatio: null, far: 10000, near: 0.1));
+              widget.controller.setupScene(widget.debug ?? false);
+
+              widget.controller.createCamera(widget.cameraConfig ??
+                  PerspectiveCameraConfig(fov: 75, aspectRatio: null, far: 10000, near: 0.1));
               widget.controller.createOrbitControls(
                 widget.orbitControls ??
                     OrbitControls(
