@@ -144,21 +144,22 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
               }
 
               //! TODO: Fix this ish related to javascript not compiling in time
-              widget.controller.setupScene(widget.debug ?? false);
+              await Future.delayed(Duration(milliseconds: 500), () {
+                widget.controller.setupScene(widget.debug ?? false);
 
-              widget.controller.createCamera(widget.cameraConfig ??
-                  PerspectiveCameraConfig(fov: 75, aspectRatio: null, far: 10000, near: 0.1));
-              widget.controller.createOrbitControls(
-                widget.orbitControls ??
-                    OrbitControls(
-                      minDistance: 3,
-                      maxDistance: 500,
-                      autoRotateSpeed: 2.5,
-                    ),
-              );
-              widget.controller.loadModels(widget.models);
-              widget.controller.addAmbientLight('0xff0000', 1);
-              widget.onPageFinishedLoading;
+                widget.controller.createCamera(widget.cameraConfig ?? PerspectiveCameraConfig(fov: 75, aspectRatio: null, far: 10000, near: 0.1));
+                widget.controller.createOrbitControls(
+                  widget.orbitControls ??
+                      OrbitControls(
+                        minDistance: 3,
+                        maxDistance: 500,
+                        autoRotateSpeed: 2.5,
+                      ),
+                );
+                widget.controller.loadModels(widget.models);
+                widget.controller.addAmbientLight('0xff0000', 1);
+                widget.onPageFinishedLoading;
+              });
             },
             javascriptChannels: channels,
             onWebResourceError: (error) {
