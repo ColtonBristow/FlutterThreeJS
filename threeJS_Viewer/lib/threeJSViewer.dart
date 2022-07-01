@@ -48,18 +48,17 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
   double loadingProgress = 0;
   Set<JavascriptChannel> channels = {};
   Future<InternetAddress>? server;
+  final LocalAssetsServer las = LocalAssetsServer(
+    port: 8080,
+    address: InternetAddress.loopbackIPv4,
+    assetsBasePath: 'packages/threeJS_Viewer/web',
+    logger: const DebugLogger(),
+  );
 
   Future<InternetAddress>? initServer() async {
     print("initServer() run");
     if (widget.addressServer == null) {
       if (kDebugMode == true) print("widget.addressServer == null");
-
-      final las = LocalAssetsServer(
-        port: widget.port ?? 8080,
-        address: InternetAddress.loopbackIPv4,
-        assetsBasePath: 'packages/threeJS_Viewer/web',
-        logger: const DebugLogger(),
-      );
 
       return await las.serve();
     } else {
@@ -103,6 +102,8 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
   dispose() {
     // TODO: implement dispose
     super.dispose();
+    las.stop();
+    if (widget.addressServer != null) widget.addressServer!.stop();
   }
 
   @override
