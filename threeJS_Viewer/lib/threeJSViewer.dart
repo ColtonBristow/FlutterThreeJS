@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io' show InternetAddress, Platform;
@@ -50,7 +52,8 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
   Future<InternetAddress>? initServer() async {
     print("initServer() run");
     if (widget.addressServer == null) {
-      print("widget.addressServer == null");
+      if (kDebugMode == true) print("widget.addressServer == null");
+
       final las = LocalAssetsServer(
         port: widget.port ?? 8080,
         address: InternetAddress.loopbackIPv4,
@@ -60,7 +63,8 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
 
       return await las.serve();
     } else {
-      print("widget.addressServer != null");
+      if (kDebugMode == true) print("widget.addressServer != null");
+
       return await widget.addressServer!.serve();
     }
   }
@@ -158,7 +162,15 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
             },
             javascriptChannels: channels,
             onWebResourceError: (error) {
-              widget.onError ?? () {};
+              widget.onError ??
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      // ignore: avoid_unnecessary_containers
+                      content: Container(
+                        child: Text("$error"),
+                      ),
+                    ),
+                  );
             },
           );
         }
