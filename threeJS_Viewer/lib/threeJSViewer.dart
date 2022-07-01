@@ -52,7 +52,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
     if (widget.addressServer == null) {
       print("widget.addressServer == null");
       final las = LocalAssetsServer(
-        port: 4000,
+        port: widget.port ?? 8080,
         address: InternetAddress.loopbackIPv4,
         assetsBasePath: 'packages/threeJS_Viewer/web',
         logger: const DebugLogger(),
