@@ -53,13 +53,14 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
     print("initServer() run");
     if (widget.addressServer == null) {
       if (kDebugMode == true) print("widget.addressServer == null");
-
-      widget.addressServer = LocalAssetsServer(
-        port: widget.port ?? 8080,
-        address: InternetAddress.loopbackIPv4,
-        assetsBasePath: 'packages/threeJS_Viewer/web',
-        logger: const DebugLogger(),
-      );
+      setState(() {
+        widget.addressServer = LocalAssetsServer(
+          port: widget.port ?? 8080,
+          address: InternetAddress.loopbackIPv4,
+          assetsBasePath: 'packages/threeJS_Viewer/web',
+          logger: const DebugLogger(),
+        );
+      });
     }
 
     return await widget.addressServer!.serve();
