@@ -30,7 +30,9 @@ class ModelView extends StatelessWidget {
           child: Icon(Icons.animation),
           focusColor: Colors.red,
           backgroundColor: Colors.redAccent,
-          onPressed: () {},
+          onPressed: () {
+            controller.tweenCamera(12, 4, 7, 2000, false);
+          },
         ),
         appBar: AppBar(
           title: Text("ThreeJSViewer"),
@@ -50,8 +52,7 @@ class ModelView extends StatelessWidget {
             },
             models: [
               ThreeModel(
-                src:
-                    'https://dfoxw2i5wdgo8.cloudfront.net/mobile/request/GreatBibleWoodenCover.glb',
+                src: 'https://dfoxw2i5wdgo8.cloudfront.net/mobile/request/GreatBibleWoodenCover.glb',
                 playAnimation: false,
               ),
             ],

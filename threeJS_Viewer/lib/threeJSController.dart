@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:threeJS_Viewer/threeJSModelViewer.dart';
@@ -13,10 +14,8 @@ class ThreeJSController {
     required this.webController,
   });
 
-  Future<String?> setupScene(bool debug) async {
-    Future<String>? result = webController?.runJavascriptReturningResult('window.setupScene($debug)');
-
-    return result;
+  Future<void> setupScene(bool debug) async {
+    return webController?.runJavascript('window.setupScene($debug)');
   }
 
   Future<void> loadModels(List<ThreeModel> models) async {
@@ -24,6 +23,7 @@ class ThreeJSController {
       if (kDebugMode) {
         log("trying to load the following model: ${model.src}");
       }
+
       await webController?.runJavascript('window.loadModel(\'${model.src}\', ${model.playAnimation})');
     }
   }
@@ -53,7 +53,12 @@ class ThreeJSController {
     await webController?.runJavascript('window.addDirectionalLight(${light.toString(map: true)})');
   }
 
-  void resetCameraControls({autoRotate = bool}) {
-    webController?.runJavascript('resetCameraControls(${autoRotate ?? true})');
+  void resetCameraControls(bool autoRotate) {
+    webController?.runJavascript('window.resetCameraControls(${autoRotate})');
+  }
+
+  void tweenCamera(int targetX, int targetY, int targetZ, int duration, bool autoRotate) {
+    webController?.runJavascript('window.tweenCamera(${targetX}, ${targetY}, ${targetZ}, ${duration})');
+    if (Platform.isIOS) resetCameraControls(autoRotate);
   }
 }

@@ -20,6 +20,7 @@ class ThreeJSViewer extends StatefulWidget {
   PerspectiveCameraConfig? cameraConfig;
   LocalAssetsServer? addressServer;
   OrbitControls? orbitControls;
+  void Function(JavascriptMessage)? javasciptErroronMessageReceived;
   int? port;
   bool? debug;
   List<ThreeModel> models;
@@ -27,6 +28,7 @@ class ThreeJSViewer extends StatefulWidget {
 
   ThreeJSViewer({
     Key? key,
+    this.javasciptErroronMessageReceived,
     required this.controller,
     this.port,
     this.orbitControls,
@@ -73,19 +75,25 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
       JavascriptChannel(
         name: "Print",
         onMessageReceived: (JavascriptMessage message) {
-          log("from js: ${message.message}");
+          log("Print from js: ${message.message}");
         },
       ),
       JavascriptChannel(
-        name: "Debug",
-        onMessageReceived: (JavascriptMessage message) {
-          log("from three js: ${message.message}");
+        name: "Error",
+        onMessageReceived: widget.javasciptErroronMessageReceived ??= (JavascriptMessage message) {
+          log("Error from js: ${message.message}");
         },
       ),
       JavascriptChannel(
-        name: "PostMessage",
+        name: "ModelLoading",
         onMessageReceived: (JavascriptMessage message) {
-          log("from three js: ${message.message}");
+          log("${message.message}% model loaded");
+        },
+      ),
+      JavascriptChannel(
+        name: "CameraLoading",
+        onMessageReceived: (JavascriptMessage message) {
+          log("${message.message}% camera loaded");
         },
       ),
     };
@@ -134,6 +142,8 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
             javascriptMode: JavascriptMode.unrestricted,
             onWebViewCreated: (c) {
               widget.controllerCompleter?.complete(c);
+
+              if (kDebugMode) log("controller initilized");
               widget.controller = ThreeJSController(webController: c);
             },
             onPageFinished: (details) async {
@@ -158,6 +168,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
                       ),
                 );
                 widget.controller.loadModels(widget.models);
+                //Future<String?> error = widget.controller.loadModels(widget.models);
                 widget.controller.addAmbientLight('0xff0000', 1);
                 widget.onPageFinishedLoading;
               });

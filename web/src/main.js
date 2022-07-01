@@ -16,6 +16,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import Stats from 'three/examples/jsm/libs/stats.module';
+import * as TWEEN from '@tweenjs/tween.js'
 
 let scene, camera, clock, renderer, mixer, controls, loader, stats, debug;
 
@@ -88,7 +89,7 @@ const setOrbitControls = (
   controls.maxDistance = maxDistance != null ? maxDistance : Infinity;
   controls.enablePan = enablePan != null ? enablePan : true;
   controls.autoRotateSpeed = autoRotateSpeed != null ? autoRotateSpeed : 0;
-  controls.autoRotate = autoRotate != null ? autoRotate : false;
+  //controls.autoRotate = autoRotate != null ? autoRotate : false;
   controls.enableZoom = enableZoom != null ? enableZoom : true;
 
   controls.addEventListener('start', function () {
@@ -134,7 +135,7 @@ const setCameraRotation = (x, y, z) => {
 
 const loadModel = (modelUrl, playAnimation) => {
   window.Print.postMessage('loadModel() called');
-  return new Promise((res, rej) => {
+  new Promise((res, rej) => {
     // Instantiate a loader
     loader = new GLTFLoader();
 
@@ -146,7 +147,7 @@ const loadModel = (modelUrl, playAnimation) => {
     //TODO: add cross origin and header control
 
     // Load a glTF resource
-   loader.load(
+    loader.load(
       // resource URL
       'https://warm-mesa-43639.herokuapp.com/' + modelUrl,
       // called when the resource is loaded
@@ -171,13 +172,18 @@ const loadModel = (modelUrl, playAnimation) => {
       },
       // called while loading is progressing
       (xhr) => {
-        console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
-        window.onObjectLoading((xhr.loaded / xhr.total) * 100);
+        var percentLoaded = (xhr.loaded / xhr.total) * 100
+
+
+        console.log(percentLoaded + '% loaded');
+        window.ModelLoading.postMessage((xhr.loaded / xhr.total) * 100);
       },
       // called when loading has errors
       (error) => {
-        console.log('An error happened', error);
         window.onLoadError('on loading error: ' + error);
+
+        window.Error.postMessage(error)
+
         rej(error);
       }
     );
@@ -186,7 +192,7 @@ const loadModel = (modelUrl, playAnimation) => {
 
 const loadCam = (modelUrl) => {
   window.Print.postMessage('loadCam() called');
-  return new Promise((res, rej) => {
+  new Promise((res, rej) => {
     // Instantiate a loader
     loader = new GLTFLoader();
 
@@ -210,14 +216,19 @@ const loadCam = (modelUrl) => {
       },
       // called while loading is progressing
       (xhr) => {
-        console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
-        window.onObjectLoading((xhr.loaded / xhr.total) * 100);
+        var percentLoaded = (xhr.loaded / xhr.total) * 100
+        window.onObjectLoading(percentLoaded);
+
+        //! send loading to flutter to be parsed
+        window.CameraLoading.postMessage(percentLoaded)
+
       },
       // called when loading has errors
       (error) => {
-        console.log('An error happened', error);
         window.onLoadError(error);
         rej(error);
+
+        window.Error.postMessage(error)
       }
     );
   });
@@ -229,45 +240,25 @@ const addAmbientLight = (color, intensity) => {
   scene.add(ambient);
 };
 
-// const addDirectionalLight = (color, intensity, pos) => {
-//   const light2 = new DirectionalLight(color, intensity ?? 0.8 * Math.PI);
-//   light2.position.set(pos?.x ?? 0.5, pos?.y ?? 0, pos?.z ?? 0.866);
-//   scene.add(light2);
-// };
-
-// const setupLights = (type, position, colorRGB, distance, intensity, decay) => {
-//   switch (type) {
-//     case "ambientLight":
-//       addAmbientLight(scene, position, colorRGB, distance, intensity, decay);
-//     case "directionalLight":
-
-//     case "hemisphereLight":
-
-//     case "spotLight":
-
-//     case "pointLight":
-//   }
-// };
-
 const animate = () => {
   window.Print.postMessage('animate() called');
   requestAnimationFrame(animate);
   var delta = clock.getDelta();
   if (mixer) mixer.update(delta);
   if (controls) controls.update();
+  TWEEN.update();
   renderer.render(scene, camera);
   //   if (debug) stats.update();
   if (camera && controls && shouldDemoControls) {
-    camera.position.z += 0.005;
+    //camera.position.z += 0.005;
   }
 };
 
-const recreateControlsInstance = (autoRotate) => {
-  JavascriptChannel.postMessage('recreateControlsInstance() called');
+const resetCameraControls = (autoRotate) => {
+  window.Print.postMessage("resetCameraControls() called");
   controls.dispose();
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enablePan = false;
-  controls.touches.ONE = THREE.TOUCH.ROTATE;
   controls.minDistance = 3;
   controls.maxDistance = 500;
 
@@ -279,13 +270,23 @@ const recreateControlsInstance = (autoRotate) => {
   controls.saveState();
 };
 
+const tweenCamera = (targetX, targetY, targetZ, duration) => {
+  window.Print.postMessage("tweenCamera() called");
+
+  shouldDemoControls = false;
+  controls.autoRotate = false;
+  var tweenCamera = new TWEEN.Tween(camera.position).to({ x: targetX, y: targetY, z: targetZ }, duration).easing(TWEEN.Easing.Quartic.In);
+  tweenCamera.start();
+}
+
+window.tweenCamera = tweenCamera;
 window.setupScene = setupScene;
 window.setOrbitControls = setOrbitControls;
 window.setControlsTarget = setControlsTarget;
 window.loadModel = loadModel;
 window.addAmbientLight = addAmbientLight;
 window.loadCam = loadCam;
-window.resetCameraControls = recreateControlsInstance;
+window.resetCameraControls = resetCameraControls;
 window.addGridHelper = addGridHelper;
 window.setCameraPosition = setCameraPosition;
 window.setCameraRotation = setCameraRotation;
