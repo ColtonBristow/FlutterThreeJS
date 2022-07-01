@@ -54,19 +54,15 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
     if (widget.addressServer == null) {
       if (kDebugMode == true) print("widget.addressServer == null");
 
-      final las = LocalAssetsServer(
+      widget.addressServer = LocalAssetsServer(
         port: widget.port ?? 8080,
         address: InternetAddress.loopbackIPv4,
         assetsBasePath: 'packages/threeJS_Viewer/web',
         logger: const DebugLogger(),
       );
-
-      return await las.serve();
-    } else {
-      if (kDebugMode == true) print("widget.addressServer != null");
-
-      return await widget.addressServer!.serve();
     }
+
+    return await widget.addressServer!.serve();
   }
 
   initChannels() {
@@ -103,6 +99,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
   dispose() {
     // TODO: implement dispose
     super.dispose();
+    widget.addressServer!.stop();
   }
 
   @override
