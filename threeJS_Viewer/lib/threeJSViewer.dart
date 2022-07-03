@@ -111,7 +111,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
             log("${message.message}% model loaded");
           }
 
-          if (widget.onLoadProgress != null) widget.onLoadProgress!(double.tryParse(message.message)!);
+          //if (widget.onLoadProgress != null) widget.onLoadProgress!(double.tryParse(message.message)!);
         },
       ),
       JavascriptChannel(
@@ -144,6 +144,9 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
             backgroundColor: Colors.transparent,
             initialUrl: 'http://${address.address}:${widget.port ?? 8080}',
             javascriptMode: JavascriptMode.unrestricted,
+            onProgress: (int progress) {
+              if (widget.onLoadProgress != null) widget.onLoadProgress!(progress as double);
+            },
             onWebViewCreated: (c) {
               widget.controllerCompleter?.complete(c);
 
