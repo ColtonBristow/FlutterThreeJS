@@ -25,23 +25,24 @@ class ThreeJSViewer extends StatefulWidget {
   bool? debug;
   List<ThreeModel> models;
   Completer<WebViewController>? controllerCompleter;
-  Function(WebViewController)? onWebViewCreated;
+  Function(ThreeJSController)? onWebViewCreated;
 
-  ThreeJSViewer({
-    Key? key,
-    this.javasciptErroronMessageReceived,
-    required this.controller,
-    this.port,
-    this.orbitControls,
-    this.onPageFinishedLoading,
-    this.channels,
-    this.onError,
-    this.cameraConfig,
-    this.addressServer,
-    this.debug,
-    required this.models,
-    this.controllerCompleter,
-  }) : super(key: key);
+  ThreeJSViewer(
+      {Key? key,
+      this.javasciptErroronMessageReceived,
+      required this.controller,
+      this.port,
+      this.orbitControls,
+      this.onPageFinishedLoading,
+      this.channels,
+      this.onError,
+      this.cameraConfig,
+      this.addressServer,
+      this.debug,
+      required this.models,
+      this.controllerCompleter,
+      this.onWebViewCreated})
+      : super(key: key);
 
   @override
   _ThreeJSViewerState createState() => _ThreeJSViewerState();
@@ -143,10 +144,11 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
             javascriptMode: JavascriptMode.unrestricted,
             onWebViewCreated: (c) {
               widget.controllerCompleter?.complete(c);
-              if (widget.onWebViewCreated != null) widget.onWebViewCreated!(c);
 
               if (kDebugMode) log("controller initilized");
               widget.controller = ThreeJSController(webController: c);
+
+              if (widget.onWebViewCreated != null) widget.onWebViewCreated!(widget.controller);
             },
             onPageFinished: (details) async {
               if (widget.controller.webController == null && kDebugMode) {
