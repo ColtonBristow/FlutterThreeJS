@@ -49,7 +49,7 @@ class _ModelViewState extends State<ModelView> {
               ? Align(
                   alignment: Alignment.center,
                   child: CircularProgressIndicator(
-                    value: percLoaded / 100,
+                    value: null,
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                     backgroundColor: Colors.white,
                   ),

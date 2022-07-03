@@ -110,7 +110,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
           if (widget.debug ?? false) {
             log("${message.message}% model loaded");
           }
-
+          //!
           //if (widget.onLoadProgress != null) widget.onLoadProgress!(double.tryParse(message.message)!);
         },
       ),
@@ -145,7 +145,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
             initialUrl: 'http://${address.address}:${widget.port ?? 8080}',
             javascriptMode: JavascriptMode.unrestricted,
             onProgress: (int progress) {
-              if (widget.onLoadProgress != null) widget.onLoadProgress!(progress as double);
+              if (widget.onLoadProgress != null) widget.onLoadProgress!(progress / 1.0);
             },
             onWebViewCreated: (c) {
               widget.controllerCompleter?.complete(c);
