@@ -57,7 +57,7 @@ class ThreeJSController {
     webController?.runJavascript('window.resetCameraControls(${autoRotate})');
   }
 
-  void tweenCamera(int targetX, int targetY, int targetZ, int duration, bool autoRotate) {
+  void tweenCamera(double targetX, double targetY, double targetZ, double duration, bool autoRotate) {
     webController?.runJavascript('window.tweenCamera(${targetX}, ${targetY}, ${targetZ}, ${duration})');
     if (Platform.isIOS) resetCameraControls(autoRotate);
   }

@@ -25,6 +25,7 @@ class ThreeJSViewer extends StatefulWidget {
   bool? debug;
   List<ThreeModel> models;
   Completer<WebViewController>? controllerCompleter;
+  Function(WebViewController)? onWebViewCreated;
 
   ThreeJSViewer({
     Key? key,
@@ -142,6 +143,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
             javascriptMode: JavascriptMode.unrestricted,
             onWebViewCreated: (c) {
               widget.controllerCompleter?.complete(c);
+              if (widget.onWebViewCreated != null) widget.onWebViewCreated!(c);
 
               if (kDebugMode) log("controller initilized");
               widget.controller = ThreeJSController(webController: c);
