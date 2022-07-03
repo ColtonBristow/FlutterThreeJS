@@ -13,7 +13,6 @@ import 'package:threeJS_Viewer/threeJSModelViewer.dart';
 
 // ignore: must_be_immutable
 class ThreeJSViewer extends StatefulWidget {
-  ThreeJSController controller;
   Function? onPageFinishedLoading;
   Iterable<JavascriptChannel>? channels;
   Function(WebResourceError error)? onError;
@@ -30,7 +29,6 @@ class ThreeJSViewer extends StatefulWidget {
   ThreeJSViewer(
       {Key? key,
       this.javasciptErroronMessageReceived,
-      required this.controller,
       this.port,
       this.orbitControls,
       this.onPageFinishedLoading,
@@ -49,6 +47,7 @@ class ThreeJSViewer extends StatefulWidget {
 }
 
 class _ThreeJSViewerState extends State<ThreeJSViewer> {
+  ThreeJSController controller = ThreeJSController(webController: null);
   double loadingProgress = 0;
   Set<JavascriptChannel> channels = {};
   Future<InternetAddress>? server;
@@ -146,13 +145,13 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
               widget.controllerCompleter?.complete(c);
 
               if (kDebugMode) log("controller initilized");
-              widget.controller = ThreeJSController(webController: c);
+              controller = ThreeJSController(webController: c);
 
-              if (widget.onWebViewCreated != null) widget.onWebViewCreated!(widget.controller);
+              if (widget.onWebViewCreated != null) widget.onWebViewCreated!(controller);
             },
             onPageFinished: (details) async {
-              if (widget.controller.webController == null && kDebugMode) {
-                log('widget TJScontroller:  ${widget.controller.toString()} \n widget WVController: + ${widget.controller.webController.toString()}');
+              if (controller.webController == null && kDebugMode) {
+                log('widget TJScontroller:  ${controller.toString()} \n widget WVController: + ${controller.webController.toString()}');
               }
               if (kDebugMode) {
                 log("calling js");
@@ -160,10 +159,10 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
 
               //! TODO: Fix this ish related to javascript not compiling in time
               await Future.delayed(Duration(milliseconds: 500), () {
-                widget.controller.setupScene(widget.debug ?? false);
+                controller.setupScene(widget.debug ?? false);
 
-                widget.controller.createCamera(widget.cameraConfig ?? PerspectiveCameraConfig(fov: 75, aspectRatio: null, far: 10000, near: 0.1));
-                widget.controller.createOrbitControls(
+                controller.createCamera(widget.cameraConfig ?? PerspectiveCameraConfig(fov: 75, aspectRatio: null, far: 10000, near: 0.1));
+                controller.createOrbitControls(
                   widget.orbitControls ??
                       OrbitControls(
                         minDistance: 3,
@@ -171,9 +170,9 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
                         autoRotateSpeed: 2.5,
                       ),
                 );
-                widget.controller.loadModels(widget.models);
+                controller.loadModels(widget.models);
                 //Future<String?> error = widget.controller.loadModels(widget.models);
-                widget.controller.addAmbientLight('0xff0000', 1);
+                controller.addAmbientLight('0xff0000', 1);
                 widget.onPageFinishedLoading;
               });
             },

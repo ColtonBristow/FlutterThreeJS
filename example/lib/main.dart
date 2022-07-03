@@ -42,7 +42,6 @@ class ModelView extends StatelessWidget {
           color: Colors.black,
           child: ThreeJSViewer(
             debug: true,
-            controller: controller,
             onError: (details) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
