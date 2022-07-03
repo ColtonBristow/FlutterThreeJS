@@ -14,7 +14,6 @@ import 'package:threeJS_Viewer/threeJSModelViewer.dart';
 // ignore: must_be_immutable
 class ThreeJSViewer extends StatefulWidget {
   Function? onPageFinishedLoading;
-  Iterable<JavascriptChannel>? channels;
   Function(WebResourceError error)? onError;
   PerspectiveCameraConfig? cameraConfig;
   LocalAssetsServer? addressServer;
@@ -25,22 +24,23 @@ class ThreeJSViewer extends StatefulWidget {
   List<ThreeModel> models;
   Completer<WebViewController>? controllerCompleter;
   Function(ThreeJSController)? onWebViewCreated;
+  Function(double)? onLoadProgress;
 
-  ThreeJSViewer(
-      {Key? key,
-      this.javasciptErroronMessageReceived,
-      this.port,
-      this.orbitControls,
-      this.onPageFinishedLoading,
-      this.channels,
-      this.onError,
-      this.cameraConfig,
-      this.addressServer,
-      this.debug,
-      required this.models,
-      this.controllerCompleter,
-      this.onWebViewCreated})
-      : super(key: key);
+  ThreeJSViewer({
+    Key? key,
+    this.javasciptErroronMessageReceived,
+    this.port,
+    this.orbitControls,
+    this.onPageFinishedLoading,
+    this.onError,
+    this.cameraConfig,
+    this.addressServer,
+    this.debug,
+    required this.models,
+    this.controllerCompleter,
+    this.onWebViewCreated,
+    this.onLoadProgress,
+  }) : super(key: key);
 
   @override
   _ThreeJSViewerState createState() => _ThreeJSViewerState();
@@ -71,39 +71,9 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
     }
   }
 
-  initChannels() {
-    channels = {
-      JavascriptChannel(
-        name: "Print",
-        onMessageReceived: (JavascriptMessage message) {
-          log("Print from js: ${message.message}");
-        },
-      ),
-      JavascriptChannel(
-        name: "Error",
-        onMessageReceived: widget.javasciptErroronMessageReceived ??= (JavascriptMessage message) {
-          log("Error from js: ${message.message}");
-        },
-      ),
-      JavascriptChannel(
-        name: "ModelLoading",
-        onMessageReceived: (JavascriptMessage message) {
-          log("${message.message}% model loaded");
-        },
-      ),
-      JavascriptChannel(
-        name: "CameraLoading",
-        onMessageReceived: (JavascriptMessage message) {
-          log("${message.message}% camera loaded");
-        },
-      ),
-    };
-  }
-
   @override
   initState() {
     if (Platform.isAndroid) WebView.platform = AndroidWebView();
-    initChannels();
     super.initState();
   }
 
@@ -118,6 +88,39 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
   @override
   Widget build(BuildContext context) {
     server ??= initServer();
+    channels = {
+      JavascriptChannel(
+        name: "Print",
+        onMessageReceived: (JavascriptMessage message) {
+          if (widget.debug ?? false) {
+            log("Print from js: ${message.message}");
+          }
+        },
+      ),
+      JavascriptChannel(
+        name: "Error",
+        onMessageReceived: widget.javasciptErroronMessageReceived ??= (JavascriptMessage message) {
+          log("Error from js: ${message.message}");
+        },
+      ),
+      JavascriptChannel(
+        name: "ModelLoading",
+        onMessageReceived: (JavascriptMessage message) {
+          // Use this for loading values
+          if (widget.debug ?? false) {
+            log("${message.message}% model loaded");
+          }
+
+          if (widget.onLoadProgress != null) widget.onLoadProgress!(double.tryParse(message.message)!);
+        },
+      ),
+      JavascriptChannel(
+        name: "CameraLoading",
+        onMessageReceived: (JavascriptMessage message) {
+          log("${message.message}% camera loaded");
+        },
+      ),
+    };
 
     return FutureBuilder(
       future: server,
