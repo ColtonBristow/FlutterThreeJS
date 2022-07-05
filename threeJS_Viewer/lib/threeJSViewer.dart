@@ -25,6 +25,7 @@ class ThreeJSViewer extends StatefulWidget {
   Completer<WebViewController>? controllerCompleter;
   Function(ThreeJSController)? onWebViewCreated;
   Function(double)? onLoadProgress;
+  final double scale;
 
   ThreeJSViewer({
     Key? key,
@@ -40,6 +41,7 @@ class ThreeJSViewer extends StatefulWidget {
     this.controllerCompleter,
     this.onWebViewCreated,
     this.onLoadProgress,
+    required this.scale,
   }) : super(key: key);
 
   @override
@@ -171,12 +173,12 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
                 controller.createOrbitControls(
                   widget.orbitControls ??
                       OrbitControls(
-                        minDistance: 3,
+                        minDistance: 0,
                         maxDistance: 500,
                         autoRotateSpeed: 2.5,
                       ),
                 );
-                controller.loadModels(widget.models);
+                controller.loadModels(widget.models, widget.scale);
                 //Future<String?> error = widget.controller.loadModels(widget.models);
                 controller.addAmbientLight('0xff0000', 1);
                 widget.onPageFinishedLoading;

@@ -36,7 +36,9 @@ class _ModelViewState extends State<ModelView> {
         child: Icon(Icons.animation),
         focusColor: Colors.red,
         backgroundColor: Colors.redAccent,
-        onPressed: () {},
+        onPressed: () {
+          controller?.tweenCamera(-1, 8, -11, 2000, false);
+        },
       ),
       appBar: AppBar(
         title: Text("ThreeJSViewer"),
@@ -56,6 +58,7 @@ class _ModelViewState extends State<ModelView> {
                 )
               : Container(),
           ThreeJSViewer(
+            scale: 20,
             onLoadProgress: (double percentLoaded) {
               print("Perc loaded: ${percentLoaded}");
               setState(() {
@@ -75,7 +78,7 @@ class _ModelViewState extends State<ModelView> {
             },
             models: [
               ThreeModel(
-                src: "https://dfoxw2i5wdgo8.cloudfront.net/mobile/request/bigKhachkar.glb",
+                src: "https://dfoxw2i5wdgo8.cloudfront.net/mobile/request/HMDesk.glb",
                 playAnimation: false,
               ),
             ],

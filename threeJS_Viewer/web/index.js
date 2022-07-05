@@ -28005,6 +28005,7 @@ TWEEN.add.bind(TWEEN);
 TWEEN.remove.bind(TWEEN);
 var update = TWEEN.update.bind(TWEEN);
 let scene, camera, clock, renderer, mixer, controls, loader, debug;
+let shouldDemoControls = true;
 const setupScene = (_debug) => {
   debug = _debug != null ? _debug : false;
   scene = new Scene();
@@ -28015,7 +28016,7 @@ const setupScene = (_debug) => {
   renderer.shadowMap.enabled = true;
   renderer.physicallyCorrectLights = true;
   renderer.outputEncoding = sRGBEncoding;
-  renderer.setClearColor(13421772, 0);
+  renderer.setClearColor(13421772, 1);
   document.body.appendChild(renderer.domElement);
   if (debug) {
     const s = Stats();
@@ -28032,6 +28033,7 @@ const createPerspectiveCamera = (fov2, aspectRatio, near, far) => {
 };
 const setOrbitControls = (polMin, polMax, azMin, azMax, minDistance, maxDistance, enablePan, autoRotateSpeed, autoRotate, enableZoom, c) => {
   window.Print.postMessage("setOrbitControls() called");
+  shouldDemoControls = autoRotate;
   controls = new OrbitControls(c != null ? c : camera, renderer.domElement);
   controls.target.set(0, 0, 0);
   controls.minPolarAngle = polMin != null ? polMin : -Infinity;
@@ -28042,13 +28044,15 @@ const setOrbitControls = (polMin, polMax, azMin, azMax, minDistance, maxDistance
   controls.maxDistance = maxDistance != null ? maxDistance : Infinity;
   controls.enablePan = enablePan != null ? enablePan : true;
   controls.autoRotateSpeed = autoRotateSpeed != null ? autoRotateSpeed : 0;
+  controls.autoRotate = autoRotate != null ? autoRotate : false;
   controls.enableZoom = enableZoom != null ? enableZoom : true;
   controls.addEventListener("start", function() {
     controls.autoRotate = false;
+    shouldDemoControls = false;
   });
   controls.update();
   animate();
-  setCameraPosition(0, 0, 5);
+  setCameraPosition(0, 0, 30);
   window.controls = controls;
 };
 const setControlsTarget = (x, y, z) => {
@@ -28076,7 +28080,7 @@ const setCameraRotation = (x, y, z) => {
   camera.rotation.set(x, y, z);
   controls.update();
 };
-const loadModel = (modelUrl, playAnimation) => {
+const loadModel = (modelUrl, playAnimation, scale) => {
   window.Print.postMessage("loadModel() called");
   new Promise((res, rej) => {
     loader = new GLTFLoader();
@@ -28096,6 +28100,7 @@ const loadModel = (modelUrl, playAnimation) => {
           node.material.depthWrite = !node.material.transparent;
         }
       });
+      gltf.scene.scale.set(scale, scale, scale);
       scene.add(gltf.scene);
       res(gltf);
       if (debug) {
@@ -28151,6 +28156,9 @@ const animate = () => {
     controls.update();
   update();
   renderer.render(scene, camera);
+  if (camera && controls && shouldDemoControls) {
+    camera.position.z += 0.03;
+  }
 };
 const resetCameraControls = (autoRotate) => {
   window.Print.postMessage("resetCameraControls() called");
@@ -28167,6 +28175,7 @@ const resetCameraControls = (autoRotate) => {
 };
 const tweenCamera = (targetX, targetY, targetZ, duration) => {
   window.Print.postMessage("tweenCamera() called");
+  shouldDemoControls = false;
   controls.autoRotate = false;
   var tweenCamera2 = new Tween(camera.position).to({ x: targetX, y: targetY, z: targetZ }, duration).easing(Easing.Quartic.In);
   tweenCamera2.start();
