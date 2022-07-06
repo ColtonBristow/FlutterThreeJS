@@ -24,7 +24,7 @@ class ThreeJSViewer extends StatefulWidget {
   List<ThreeModel> models;
   Completer<WebViewController>? controllerCompleter;
   Function(ThreeJSController)? onWebViewCreated;
-  Widget Function(double, String)? progressBuilder;
+  Widget Function(double?, String)? progressBuilder;
   final double scale;
 
   ThreeJSViewer({
@@ -59,8 +59,8 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
     assetsBasePath: 'packages/threeJS_Viewer/web',
     logger: const DebugLogger(),
   );
-  double webViewProgress = 0;
-  double modelProgress = 0;
+  double? webViewProgress;
+  double? modelProgress;
   String loadMessage = "Initializing Webview...";
 
   Future<InternetAddress>? initServer() async {
@@ -137,9 +137,10 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
           future: server,
           builder: (context, snapshot) {
             if (snapshot.hasData == false) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
+              setState(() {
+                loadMessage = "Initializing Server...";
+              });
+              return SizedBox();
             } else {
               InternetAddress address = snapshot.data as InternetAddress;
               log('started local server http://${address.address}:${widget.port ?? 8080}');
@@ -216,8 +217,9 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
             }
           },
         ),
-        if (modelProgress + webViewProgress != 200 && widget.progressBuilder != null)
-          widget.progressBuilder!((modelProgress + webViewProgress) / 200.0, loadMessage)
+        if ((modelProgress ?? 0) + (webViewProgress ?? 0) != 200 && widget.progressBuilder != null)
+          widget.progressBuilder!(
+              modelProgress == null || webViewProgress == null ? null : ((modelProgress! + webViewProgress!) / 200.0), loadMessage)
       ],
     );
   }

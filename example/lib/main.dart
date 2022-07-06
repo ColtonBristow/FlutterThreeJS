@@ -51,7 +51,7 @@ class _ModelViewState extends State<ModelView> {
         child: Stack(children: [
           ThreeJSViewer(
             scale: 20,
-            progressBuilder: (double progress, String message) {
+            progressBuilder: (double? progress, String message) {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
