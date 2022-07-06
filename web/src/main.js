@@ -35,7 +35,7 @@ const setupScene = (_debug) => {
   renderer.shadowMap.enabled = true;
   renderer.physicallyCorrectLights = true;
   renderer.outputEncoding = sRGBEncoding;
-  renderer.setClearColor(0xcccccc, 0);
+  renderer.setClearColor(0xcccccc, 1);
 
   document.body.appendChild(renderer.domElement);
 
@@ -56,7 +56,7 @@ const createPerspectiveCamera = (fov, aspectRatio, near, far) => {
     fov,
     aspectRatio != null ? aspectRatio : window.innerWidth / window.innerHeight,
     near,
-    far
+    far,
   );
   window.camera = camera;
   animate();
@@ -89,7 +89,7 @@ const setOrbitControls = (
   controls.maxDistance = maxDistance != null ? maxDistance : Infinity;
   controls.enablePan = enablePan != null ? enablePan : true;
   controls.autoRotateSpeed = autoRotateSpeed != null ? autoRotateSpeed : 0;
-  //controls.autoRotate = autoRotate != null ? autoRotate : false;
+  controls.autoRotate = autoRotate != null ? autoRotate : false;
   controls.enableZoom = enableZoom != null ? enableZoom : true;
 
   controls.addEventListener('start', function () {
@@ -99,7 +99,7 @@ const setOrbitControls = (
 
   controls.update();
   animate();
-  setCameraPosition(0, 0, 5);
+  setCameraPosition(0, 0, 30);
   window.controls = controls;
 };
 
@@ -133,7 +133,7 @@ const setCameraRotation = (x, y, z) => {
   controls.update();
 };
 
-const loadModel = (modelUrl, playAnimation) => {
+const loadModel = (modelUrl, playAnimation, scale) => {
   window.Print.postMessage('loadModel() called');
   new Promise((res, rej) => {
     // Instantiate a loader
@@ -163,8 +163,9 @@ const loadModel = (modelUrl, playAnimation) => {
             node.material.depthWrite = !node.material.transparent;
           }
         });
+        gltf.scene.scale.set(scale,scale,scale);
         scene.add(gltf.scene);
-
+        
         res(gltf);
         if (debug) {
           window.Print.postMessage('loaded the following: ' + modelUrl);
@@ -248,9 +249,9 @@ const animate = () => {
   if (controls) controls.update();
   TWEEN.update();
   renderer.render(scene, camera);
-  //   if (debug) stats.update();
+  // if (debug) stats.update();
   if (camera && controls && shouldDemoControls) {
-    //camera.position.z += 0.005;
+    camera.position.z += 0.03;
   }
 };
 

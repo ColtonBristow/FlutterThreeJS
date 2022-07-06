@@ -18,13 +18,13 @@ class ThreeJSController {
     return webController?.runJavascript('window.setupScene($debug)');
   }
 
-  Future<void> loadModels(List<ThreeModel> models) async {
+  Future<void> loadModels(List<ThreeModel> models, double scale) async {
     for (var model in models) {
       if (kDebugMode) {
         log("trying to load the following model: ${model.src}");
       }
 
-      await webController?.runJavascript('window.loadModel(\'${model.src}\', ${model.playAnimation})');
+      await webController?.runJavascript('window.loadModel(\'${model.src}\', ${model.playAnimation}, ${scale})');
     }
   }
 
@@ -57,7 +57,7 @@ class ThreeJSController {
     webController?.runJavascript('window.resetCameraControls(${autoRotate})');
   }
 
-  void tweenCamera(int targetX, int targetY, int targetZ, int duration, bool autoRotate) {
+  void tweenCamera(double targetX, double targetY, double targetZ, double duration, bool autoRotate) {
     webController?.runJavascript('window.tweenCamera(${targetX}, ${targetY}, ${targetZ}, ${duration})');
     if (Platform.isIOS) resetCameraControls(autoRotate);
   }
