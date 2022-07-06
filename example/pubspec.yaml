@@ -12,6 +12,7 @@ dependencies:
   threeJS_Viewer:
     path: ../threeJS_Viewer
   webview_flutter: ^3.0.4
+  local_assets_server: ^2.0.2+10
 
 dev_dependencies:
   flutter_test:
