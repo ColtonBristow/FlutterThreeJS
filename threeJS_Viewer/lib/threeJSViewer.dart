@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io' show InternetAddress, Platform;
@@ -125,7 +127,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
     return FutureBuilder(
       future: server,
       builder: (context, snapshot) {
-        if (snapshot.hasData == false || las.boundPort == null) {
+        if (snapshot.hasData == false) {
           return const Center(
             child: CircularProgressIndicator(),
           );
