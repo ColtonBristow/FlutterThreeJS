@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, file_names
 
 import 'dart:async';
 import 'dart:developer';
@@ -24,7 +24,7 @@ class ThreeJSViewer extends StatefulWidget {
   List<ThreeModel> models;
   Completer<WebViewController>? controllerCompleter;
   Function(ThreeJSController)? onWebViewCreated;
-  Function(double)? onLoadProgress;
+  Widget Function(double, String)? progressBuilder;
   final double scale;
 
   ThreeJSViewer({
@@ -40,7 +40,7 @@ class ThreeJSViewer extends StatefulWidget {
     required this.models,
     this.controllerCompleter,
     this.onWebViewCreated,
-    this.onLoadProgress,
+    this.progressBuilder,
     required this.scale,
   }) : super(key: key);
 
@@ -59,6 +59,9 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
     assetsBasePath: 'packages/threeJS_Viewer/web',
     logger: const DebugLogger(),
   );
+  double webViewProgress = 0;
+  double modelProgress = 0;
+  String loadMessage = "Initializing Webview...";
 
   Future<InternetAddress>? initServer() async {
     print("initServer() run");
@@ -113,7 +116,11 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
             log("${message.message}% model loaded");
           }
           //!
-          //if (widget.onLoadProgress != null) widget.onLoadProgress!(double.tryParse(message.message)!);
+          //if (widget.onLoadProgress != null) widget.onLoadProgress!(double.tryParse(message.message)!, "Loading Model...");
+          setState(() {
+            modelProgress = double.tryParse(message.message) ?? 0;
+            loadMessage = "Loading Model...";
+          });
         },
       ),
       JavascriptChannel(
@@ -124,81 +131,94 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
       ),
     };
 
-    return FutureBuilder(
-      future: server,
-      builder: (context, snapshot) {
-        if (snapshot.hasData == false) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        } else {
-          InternetAddress address = snapshot.data as InternetAddress;
-          log('started local server http://${address.address}:${widget.port ?? 8080}');
-          return WebView(
-            allowsInlineMediaPlayback: true,
-            // ignore: prefer_collection_literals
-            gestureRecognizers: [
-              Factory<OneSequenceGestureRecognizer>(
-                () => EagerGestureRecognizer(),
-              ),
-            ].toSet(),
-            debuggingEnabled: true,
-            backgroundColor: Colors.transparent,
-            initialUrl: 'http://${address.address}:${widget.port ?? 8080}',
-            javascriptMode: JavascriptMode.unrestricted,
-            onProgress: (int progress) {
-              if (widget.onLoadProgress != null) widget.onLoadProgress!(progress / 1.0);
-            },
-            onWebViewCreated: (c) {
-              widget.controllerCompleter?.complete(c);
+    return Stack(
+      children: [
+        FutureBuilder(
+          future: server,
+          builder: (context, snapshot) {
+            if (snapshot.hasData == false) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            } else {
+              InternetAddress address = snapshot.data as InternetAddress;
+              log('started local server http://${address.address}:${widget.port ?? 8080}');
+              return WebView(
+                allowsInlineMediaPlayback: true,
+                // ignore: prefer_collection_literals
+                gestureRecognizers: [
+                  Factory<OneSequenceGestureRecognizer>(
+                    () => EagerGestureRecognizer(),
+                  ),
+                ].toSet(),
+                debuggingEnabled: true,
+                backgroundColor: Colors.transparent,
+                initialUrl: 'http://${address.address}:${widget.port ?? 8080}',
+                javascriptMode: JavascriptMode.unrestricted,
+                onProgress: (int progress) {
+                  //if (widget.onLoadProgress != null) widget.onLoadProgress!(progress / 1.0, "Initializing WebView...");
+                  setState(() => webViewProgress = progress / 1.0);
+                  log("WEBVIEW PROGRESS: $webViewProgress");
+                },
+                onWebViewCreated: (c) {
+                  widget.controllerCompleter?.complete(c);
 
-              if (kDebugMode) log("controller initilized");
-              controller = ThreeJSController(webController: c);
+                  if (kDebugMode) log("controller initilized");
+                  controller = ThreeJSController(webController: c);
 
-              if (widget.onWebViewCreated != null) widget.onWebViewCreated!(controller);
-            },
-            onPageFinished: (details) async {
-              if (controller.webController == null && kDebugMode) {
-                log('widget TJScontroller:  ${controller.toString()} \n widget WVController: + ${controller.webController.toString()}');
-              }
-              if (kDebugMode) {
-                log("calling js");
-              }
+                  if (widget.onWebViewCreated != null) widget.onWebViewCreated!(controller);
+                },
+                onPageFinished: (details) async {
+                  if (controller.webController == null && kDebugMode) {
+                    log('widget TJScontroller:  ${controller.toString()} \n widget WVController: + ${controller.webController.toString()}');
+                  }
+                  if (kDebugMode) {
+                    log("calling js");
+                  }
 
-              //! TODO: Fix this ish related to javascript not compiling in time
-              await Future.delayed(Duration(milliseconds: 500), () {
-                controller.setupScene(widget.debug ?? false);
+                  while (webViewProgress != 100) {
+                    if (kDebugMode) print("waiting...");
+                    await Future.delayed(const Duration(milliseconds: 300));
+                  }
 
-                controller.createCamera(widget.cameraConfig ?? PerspectiveCameraConfig(fov: 75, aspectRatio: null, far: 10000, near: 0.1));
-                controller.createOrbitControls(
-                  widget.orbitControls ??
-                      OrbitControls(
-                        minDistance: 0,
-                        maxDistance: 500,
-                        autoRotateSpeed: 2.5,
-                      ),
-                );
-                controller.loadModels(widget.models, widget.scale);
-                //Future<String?> error = widget.controller.loadModels(widget.models);
-                controller.addAmbientLight('0xff0000', 1);
-                widget.onPageFinishedLoading;
-              });
-            },
-            javascriptChannels: channels,
-            onWebResourceError: (error) {
-              widget.onError ??
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      // ignore: avoid_unnecessary_containers
-                      content: Container(
-                        child: Text("$error"),
-                      ),
-                    ),
-                  );
-            },
-          );
-        }
-      },
+                  //! TODO: Fix this ish related to javascript not compiling in time
+                  await Future.delayed(const Duration(seconds: 1), () {
+                    controller.setupScene(widget.debug ?? false);
+
+                    controller.createCamera(widget.cameraConfig ?? PerspectiveCameraConfig(fov: 75, aspectRatio: null, far: 10000, near: 0.1));
+                    controller.createOrbitControls(
+                      widget.orbitControls ??
+                          OrbitControls(
+                            minDistance: 0,
+                            maxDistance: 500,
+                            autoRotateSpeed: 2.5,
+                          ),
+                    );
+                    controller.loadModels(widget.models, widget.scale);
+                    //Future<String?> error = widget.controller.loadModels(widget.models);
+                    controller.addAmbientLight('0xff0000', 1);
+                    widget.onPageFinishedLoading;
+                  });
+                },
+                javascriptChannels: channels,
+                onWebResourceError: (error) {
+                  widget.onError ??
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          // ignore: avoid_unnecessary_containers
+                          content: Container(
+                            child: Text("$error"),
+                          ),
+                        ),
+                      );
+                },
+              );
+            }
+          },
+        ),
+        if (modelProgress + webViewProgress != 200 && widget.progressBuilder != null)
+          widget.progressBuilder!((modelProgress + webViewProgress) / 200.0, loadMessage)
+      ],
     );
   }
 }

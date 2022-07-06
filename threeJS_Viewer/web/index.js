@@ -28016,7 +28016,7 @@ const setupScene = (_debug) => {
   renderer.shadowMap.enabled = true;
   renderer.physicallyCorrectLights = true;
   renderer.outputEncoding = sRGBEncoding;
-  renderer.setClearColor(13421772, 1);
+  renderer.setClearColor(13421772, 0);
   document.body.appendChild(renderer.domElement);
   if (debug) {
     const s = Stats();
@@ -28147,7 +28147,6 @@ const addAmbientLight = (color, intensity) => {
   scene.add(ambient);
 };
 const animate = () => {
-  window.Print.postMessage("animate() called");
   requestAnimationFrame(animate);
   var delta = clock.getDelta();
   if (mixer)

@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'dart:developer';
 import 'dart:io';
 
@@ -24,7 +26,7 @@ class ThreeJSController {
         log("trying to load the following model: ${model.src}");
       }
 
-      await webController?.runJavascript('window.loadModel(\'${model.src}\', ${model.playAnimation}, ${scale})');
+      await webController?.runJavascript('window.loadModel(\'${model.src}\', ${model.playAnimation}, $scale)');
     }
   }
 
@@ -54,11 +56,11 @@ class ThreeJSController {
   }
 
   void resetCameraControls(bool autoRotate) {
-    webController?.runJavascript('window.resetCameraControls(${autoRotate})');
+    webController?.runJavascript('window.resetCameraControls($autoRotate)');
   }
 
   void tweenCamera(double targetX, double targetY, double targetZ, double duration, bool autoRotate) {
-    webController?.runJavascript('window.tweenCamera(${targetX}, ${targetY}, ${targetZ}, ${duration})');
+    webController?.runJavascript('window.tweenCamera($targetX, $targetY, $targetZ, $duration)');
     if (Platform.isIOS) resetCameraControls(autoRotate);
   }
 }
