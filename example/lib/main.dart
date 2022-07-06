@@ -28,10 +28,12 @@ class ModelView extends StatefulWidget {
 class _ModelViewState extends State<ModelView> {
   ThreeJSController? controller;
   double percLoaded = 0;
+  String loadMessage = "";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.animation),
         focusColor: Colors.red,
@@ -45,30 +47,31 @@ class _ModelViewState extends State<ModelView> {
         backgroundColor: Colors.redAccent,
       ),
       body: Container(
-        color: Colors.black,
+        color: Colors.white,
         child: Stack(children: [
-          percLoaded != 100
-              ? Align(
-                  alignment: Alignment.center,
-                  child: CircularProgressIndicator(
-                    value: null,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                    backgroundColor: Colors.white,
-                  ),
-                )
-              : Container(),
           ThreeJSViewer(
             scale: 20,
-            onLoadProgress: (double percentLoaded) {
-              print("Perc loaded: ${percentLoaded}");
-              setState(() {
-                percLoaded = percentLoaded;
-              });
+            progressBuilder: (double progress, String message) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    value: progress,
+                    color: Colors.red,
+                    backgroundColor: Colors.black,
+                  ),
+                  SizedBox(
+                    height: 20,
+                    width: double.infinity,
+                  ),
+                  Text(message),
+                ],
+              );
             },
             onWebViewCreated: (c) {
               controller = c;
             },
-            debug: true,
+            debug: false,
             onError: (details) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
