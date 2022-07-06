@@ -61,7 +61,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
   );
   double? webViewProgress;
   double? modelProgress;
-  String loadMessage = "Initializing Webview...";
+  String loadMessage = "Initializing Server...";
 
   Future<InternetAddress>? initServer() async {
     print("initServer() run");
@@ -137,10 +137,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
           future: server,
           builder: (context, snapshot) {
             if (snapshot.hasData == false) {
-              setState(() {
-                loadMessage = "Initializing Server...";
-              });
-              return SizedBox();
+              return const SizedBox();
             } else {
               InternetAddress address = snapshot.data as InternetAddress;
               log('started local server http://${address.address}:${widget.port ?? 8080}');
