@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:threeJS_Viewer/threeJSController.dart';
 import 'package:threeJS_Viewer/threeJSModelViewer.dart';
@@ -71,7 +72,7 @@ class _ModelViewState extends State<ModelView> {
             onWebViewCreated: (c) {
               controller = c;
             },
-            debug: false,
+            debug: kDebugMode,
             onError: (details) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

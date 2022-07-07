@@ -259,7 +259,7 @@ const resetCameraControls = (autoRotate) => {
   window.Print.postMessage("resetCameraControls() called");
   controls.dispose();
   controls = new OrbitControls(camera, renderer.domElement);
-  controls.enablePan = false;
+  controls.enablePan = true;
   controls.minDistance = 3;
   controls.maxDistance = 500;
 
