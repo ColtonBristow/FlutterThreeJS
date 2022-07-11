@@ -28159,10 +28159,15 @@ const animate = () => {
     camera.position.z += 0.03;
   }
 };
-const resetCameraControls = (autoRotate) => {
+const resetCameraControls = (autoRotate, yOffset) => {
   window.Print.postMessage("resetCameraControls() called");
   controls.dispose();
   controls = new OrbitControls(camera, renderer.domElement);
+  controls.target.set(0, yOffset, 0);
+  if (yOffset)
+    controls.target.set(0, yOffset, 0);
+  else
+    controls.target.set(0, 0, 0);
   controls.enablePan = true;
   controls.minDistance = 3;
   controls.maxDistance = 500;
@@ -28172,10 +28177,15 @@ const resetCameraControls = (autoRotate) => {
   controls.update();
   controls.saveState();
 };
-const tweenCamera = (targetX, targetY, targetZ, duration) => {
+const tweenCamera = (targetX, targetY, targetZ, duration, yOffset) => {
   window.Print.postMessage("tweenCamera() called");
   shouldDemoControls = false;
   controls.autoRotate = false;
+  if (yOffset) {
+    controls.target.set(0, yOffset, 0);
+  } else {
+    controls.target.set(0, 0, 0);
+  }
   var tweenCamera2 = new Tween(camera.position).to({ x: targetX, y: targetY, z: targetZ }, duration).easing(Easing.Quartic.In);
   tweenCamera2.start();
 };

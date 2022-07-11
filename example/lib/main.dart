@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:threeJS_Viewer/threeJSController.dart';
@@ -40,7 +41,7 @@ class _ModelViewState extends State<ModelView> {
         focusColor: Colors.red,
         backgroundColor: Colors.redAccent,
         onPressed: () {
-          controller?.tweenCamera(-1, 8, -11, 2000, false);
+          controller?.tweenCamera(0, 0, 15, 2000, false);
         },
       ),
       appBar: AppBar(
@@ -49,45 +50,47 @@ class _ModelViewState extends State<ModelView> {
       ),
       body: Container(
         color: Colors.white,
-        child: Stack(children: [
-          ThreeJSViewer(
-            scale: 20,
-            progressBuilder: (double? progress, String message) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    value: progress,
-                    color: Colors.red,
-                    backgroundColor: Colors.black,
+        child: Stack(
+          children: [
+            ThreeJSViewer(
+              scale: 10,
+              progressBuilder: (double? progress, String message) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      value: progress,
+                      color: Colors.red,
+                      backgroundColor: Colors.black,
+                    ),
+                    SizedBox(
+                      height: 20,
+                      width: double.infinity,
+                    ),
+                    Text(message),
+                  ],
+                );
+              },
+              onWebViewCreated: (c) {
+                controller = c;
+              },
+              debug: kDebugMode,
+              onError: (details) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(details.description),
                   ),
-                  SizedBox(
-                    height: 20,
-                    width: double.infinity,
-                  ),
-                  Text(message),
-                ],
-              );
-            },
-            onWebViewCreated: (c) {
-              controller = c;
-            },
-            debug: kDebugMode,
-            onError: (details) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(details.description),
+                );
+              },
+              models: [
+                ThreeModel(
+                  src: "https://dfoxw2i5wdgo8.cloudfront.net/mobile/request/bigKhachkar.glb",
+                  playAnimation: false,
                 ),
-              );
-            },
-            models: [
-              ThreeModel(
-                src: "https://dfoxw2i5wdgo8.cloudfront.net/mobile/request/HMDesk.glb",
-                playAnimation: false,
-              ),
-            ],
-          ),
-        ]),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -55,12 +55,12 @@ class ThreeJSController {
     await webController?.runJavascript('window.addDirectionalLight(${light.toString(map: true)})');
   }
 
-  void resetCameraControls(bool autoRotate) {
-    webController?.runJavascript('window.resetCameraControls($autoRotate)');
+  void resetCameraControls(bool autoRotate, {double? yOffset}) {
+    webController?.runJavascript('window.resetCameraControls($autoRotate, $yOffset)');
   }
 
-  void tweenCamera(double targetX, double targetY, double targetZ, double duration, bool autoRotate) {
-    webController?.runJavascript('window.tweenCamera($targetX, $targetY, $targetZ, $duration)');
-    if (Platform.isIOS) resetCameraControls(autoRotate);
+  void tweenCamera(double targetX, double targetY, double targetZ, double duration, bool autoRotate, {double? yOffset}) async {
+    await webController?.runJavascript('window.tweenCamera($targetX, $targetY, $targetZ, $duration, $yOffset)');
+    if (Platform.isIOS) resetCameraControls(autoRotate, yOffset: yOffset);
   }
 }
