@@ -41,7 +41,7 @@ class _ModelViewState extends State<ModelView> {
         focusColor: Colors.red,
         backgroundColor: Colors.redAccent,
         onPressed: () {
-          controller?.tweenCamera(0, 0, 15, 2000, false);
+          controller?.tweenCamera(0, 10, 15, 2000, false, yOffset: 8);
         },
       ),
       appBar: AppBar(

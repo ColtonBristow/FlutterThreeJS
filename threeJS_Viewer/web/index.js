@@ -28181,13 +28181,15 @@ const tweenCamera = (targetX, targetY, targetZ, duration, yOffset) => {
   window.Print.postMessage("tweenCamera() called");
   shouldDemoControls = false;
   controls.autoRotate = false;
-  if (yOffset) {
-    controls.target.set(0, yOffset, 0);
-  } else {
-    controls.target.set(0, 0, 0);
-  }
-  var tweenCamera2 = new Tween(camera.position).to({ x: targetX, y: targetY, z: targetZ }, duration).easing(Easing.Quartic.In);
-  tweenCamera2.start();
+  var target = controls.target.clone();
+  var tweenTarget = new Tween(target).to({ x: 0, y: yOffset ? yOffset : 0, z: 0 }, 2e3).easing(Easing.Quartic.In).onUpdate(function() {
+    controls.target.set(target.x, target.y, target.z);
+    controls.update();
+  }).onStart(function() {
+    var tweenCamera2 = new Tween(camera.position).to({ x: targetX, y: targetY, z: targetZ }, duration).easing(Easing.Quartic.In);
+    tweenCamera2.start();
+  });
+  tweenTarget.start();
 };
 window.tweenCamera = tweenCamera;
 window.setupScene = setupScene;
