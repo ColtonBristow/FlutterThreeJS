@@ -194,7 +194,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
                     );
                     controller.loadModels(widget.models, widget.scale);
                     //Future<String?> error = widget.controller.loadModels(widget.models);
-                    controller.addAmbientLight('0xff0000', 1);
+                    controller.addAmbientLight('0xff0000', 4);
                     widget.onPageFinishedLoading;
                   });
                 },
