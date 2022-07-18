@@ -40,9 +40,8 @@ const setupScene = (_debug) => {
   document.body.appendChild(renderer.domElement);
 
   if (debug) {
-    const s = Stats();
-    document.body.appendChild(s.dom);
-    stats = s.dom;
+    stats = Stats();
+    document.body.appendChild(stats.dom);
 
     window.Print.postMessage('Scene Created with stats... 10%');
   }
@@ -163,9 +162,9 @@ const loadModel = (modelUrl, playAnimation, scale) => {
             node.material.depthWrite = !node.material.transparent;
           }
         });
-        gltf.scene.scale.set(scale,scale,scale);
+        gltf.scene.scale.set(scale, scale, scale);
         scene.add(gltf.scene);
-        
+
         res(gltf);
         if (debug) {
           window.Print.postMessage('loaded the following: ' + modelUrl);
@@ -243,13 +242,16 @@ const addAmbientLight = (color, intensity) => {
 
 const animate = () => {
   //window.Print.postMessage('animate() called');
-  requestAnimationFrame(animate);
+  setTimeout(function () {
+    requestAnimationFrame(animate);
+  }, 65);
+
   var delta = clock.getDelta();
   if (mixer) mixer.update(delta);
   if (controls) controls.update();
   TWEEN.update();
   renderer.render(scene, camera);
-  // if (debug) stats.update();
+  if (debug) stats.update();
   if (camera && controls && shouldDemoControls) {
     camera.position.z += 0.03;
   }
@@ -260,8 +262,8 @@ const resetCameraControls = (autoRotate, yOffset) => {
   controls.dispose();
   controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, yOffset, 0);
-  if(yOffset) controls.target.set(0,yOffset,0);
-  else controls.target.set(0,0,0);
+  if (yOffset) controls.target.set(0, yOffset, 0);
+  else controls.target.set(0, 0, 0);
   controls.enablePan = true;
   controls.minDistance = 3;
   controls.maxDistance = 500;
@@ -279,7 +281,7 @@ const tweenCamera = (targetX, targetY, targetZ, duration, yOffset) => {
   shouldDemoControls = false;
   controls.autoRotate = false;
   var target = controls.target.clone();
-  var tweenTarget = new TWEEN.Tween(target).to({x: 0, y: (yOffset ? yOffset : 0),z: 0}, 2000).easing(TWEEN.Easing.Quartic.In).onUpdate(function () {
+  var tweenTarget = new TWEEN.Tween(target).to({ x: 0, y: (yOffset ? yOffset : 0), z: 0 }, 2000).easing(TWEEN.Easing.Quartic.In).onUpdate(function () {
     controls.target.set(target.x, target.y, target.z);
     controls.update();
   }).onStart(function () {

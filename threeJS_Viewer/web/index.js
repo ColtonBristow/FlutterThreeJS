@@ -28004,7 +28004,7 @@ TWEEN.removeAll.bind(TWEEN);
 TWEEN.add.bind(TWEEN);
 TWEEN.remove.bind(TWEEN);
 var update = TWEEN.update.bind(TWEEN);
-let scene, camera, clock, renderer, mixer, controls, loader, debug;
+let scene, camera, clock, renderer, mixer, controls, loader, stats, debug;
 let shouldDemoControls = true;
 const setupScene = (_debug) => {
   debug = _debug != null ? _debug : false;
@@ -28019,8 +28019,8 @@ const setupScene = (_debug) => {
   renderer.setClearColor(13421772, 0);
   document.body.appendChild(renderer.domElement);
   if (debug) {
-    const s = Stats();
-    document.body.appendChild(s.dom);
+    stats = Stats();
+    document.body.appendChild(stats.dom);
     window.Print.postMessage("Scene Created with stats... 10%");
   }
   return true;
@@ -28147,7 +28147,9 @@ const addAmbientLight = (color, intensity) => {
   scene.add(ambient);
 };
 const animate = () => {
-  requestAnimationFrame(animate);
+  setTimeout(function() {
+    requestAnimationFrame(animate);
+  }, 65);
   var delta = clock.getDelta();
   if (mixer)
     mixer.update(delta);
@@ -28155,6 +28157,8 @@ const animate = () => {
     controls.update();
   update();
   renderer.render(scene, camera);
+  if (debug)
+    stats.update();
   if (camera && controls && shouldDemoControls) {
     camera.position.z += 0.03;
   }
