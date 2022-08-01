@@ -161,7 +161,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
                 onWebViewCreated: (c) {
                   widget.controllerCompleter?.complete(c);
 
-                  if (kDebugMode) log("controller initilized");
+                  if (kDebugMode) log("controller initialized");
                   controller = ThreeJSController(webController: c);
 
                   if (widget.onWebViewCreated != null) widget.onWebViewCreated!(controller);
@@ -183,7 +183,8 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
                   await Future.delayed(const Duration(seconds: 1), () {
                     controller.setupScene(widget.debug ?? false);
 
-                    controller.createCamera(widget.cameraConfig ?? PerspectiveCameraConfig(fov: 75, aspectRatio: null, far: 10000, near: 0.1));
+                    controller.createCamera(widget.cameraConfig ??
+                        PerspectiveCameraConfig(fov: 75, aspectRatio: null, far: 10000, near: 0.1));
                     controller.createOrbitControls(
                       widget.orbitControls ??
                           OrbitControls(
@@ -216,7 +217,11 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
         ),
         if ((modelProgress ?? 0) + (webViewProgress ?? 0) != 200 && widget.progressBuilder != null)
           widget.progressBuilder!(
-              modelProgress == null || webViewProgress == null ? null : ((modelProgress! + webViewProgress!) / 200.0), loadMessage)
+            modelProgress == null || webViewProgress == null
+                ? null
+                : ((modelProgress! + webViewProgress!) / 200.0),
+            loadMessage,
+          )
       ],
     );
   }

@@ -6,7 +6,7 @@ environment:
   flutter: '>=1.17.0'
 
 dependencies:
-  webview_flutter: ^3.0.2
+  webview_flutter: ^3.0.4
   local_assets_server: ^2.0.2+12
   flutter:
     sdk: flutter

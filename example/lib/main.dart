@@ -83,7 +83,7 @@ class _ModelViewState extends State<ModelView> {
               },
               models: [
                 ThreeModel(
-                  src: "https://dfoxw2i5wdgo8.cloudfront.net/mobile/request/HMDesk.glb",
+                  src: "http://dfoxw2i5wdgo8.cloudfront.net/mobile/request/HMDesk.glb",
                   playAnimation: false,
                 ),
               ],
