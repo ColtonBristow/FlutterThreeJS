@@ -4,7 +4,7 @@
 <dict>
 	<key>NSBonjourServices</key>
 	<array>
-		<string></string>
+		<string>_dartobservatory._tcp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>We need this permission to enable broadcasting 3d models</string>
