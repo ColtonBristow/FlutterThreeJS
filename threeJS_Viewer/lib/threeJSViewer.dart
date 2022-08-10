@@ -18,7 +18,8 @@ class ThreeJSViewer extends StatefulWidget {
   PerspectiveCameraConfig? cameraConfig;
   LocalAssetsServer? addressServer;
   OrbitControls? orbitControls;
-  void Function(JavascriptMessage)? javasciptErroronMessageReceived;
+  void Function(JavascriptMessage)? javascriptErrorMessageReceived;
+  final Set<Factory<OneSequenceGestureRecognizer>>? gestureRecognizers;
   int? port;
   bool? debug;
   List<ThreeModel> models;
@@ -29,7 +30,8 @@ class ThreeJSViewer extends StatefulWidget {
 
   ThreeJSViewer({
     Key? key,
-    this.javasciptErroronMessageReceived,
+    this.gestureRecognizers,
+    this.javascriptErrorMessageReceived,
     this.port,
     this.orbitControls,
     this.onPageFinishedLoading,
@@ -84,7 +86,6 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
 
   @override
   dispose() {
-    // TODO: implement dispose
     super.dispose();
     las.stop();
     if (widget.addressServer != null) widget.addressServer!.stop();
@@ -104,7 +105,7 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
       ),
       JavascriptChannel(
         name: "Error",
-        onMessageReceived: widget.javasciptErroronMessageReceived ??= (JavascriptMessage message) {
+        onMessageReceived: widget.javascriptErrorMessageReceived ??= (JavascriptMessage message) {
           log("Error from js: ${message.message}");
         },
       ),
@@ -144,11 +145,12 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
               return WebView(
                 allowsInlineMediaPlayback: true,
                 // ignore: prefer_collection_literals
-                gestureRecognizers: [
-                  Factory<OneSequenceGestureRecognizer>(
-                    () => EagerGestureRecognizer(),
-                  ),
-                ].toSet(),
+                gestureRecognizers: widget.gestureRecognizers ??
+                    {
+                      Factory<OneSequenceGestureRecognizer>(
+                        () => EagerGestureRecognizer(),
+                      ),
+                    },
                 debuggingEnabled: widget.debug ?? false,
                 zoomEnabled: true,
                 backgroundColor: Colors.transparent,
