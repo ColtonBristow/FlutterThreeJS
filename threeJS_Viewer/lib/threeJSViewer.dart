@@ -69,8 +69,14 @@ class _ThreeJSViewerState extends State<ThreeJSViewer> {
     print("initServer() run");
     if (widget.addressServer == null) {
       if (kDebugMode == true) print("widget.addressServer == null");
+      var server = las.serve();
+      server.catchError(
+        (e) {
+          kDebugMode ? log("error serving local server: $e") : null;
+        },
+      );
 
-      return await las.serve();
+      return server;
     } else {
       if (kDebugMode == true) print("widget.addressServer != null");
 
