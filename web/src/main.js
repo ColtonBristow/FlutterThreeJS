@@ -96,6 +96,10 @@ const setOrbitControls = (
     shouldDemoControls = false;
   });
 
+  controls.addEventListener("end", function() {
+    window.Print.postMessage(`x: ${camera.position.x}, y: ${camera.position.y} , z: ${camera.position.z}`);
+  });
+
   controls.update();
   animate();
   setCameraPosition(0, 0, 30);
