@@ -28101,6 +28101,7 @@ const loadModel = (modelUrl, playAnimation, scale) => {
         if (node.isMesh) {
           node.castShadow = true;
           node.material.depthWrite = !node.material.transparent;
+          node.geometry.center();
         }
       });
       gltf.scene.scale.set(scale, scale, scale);
