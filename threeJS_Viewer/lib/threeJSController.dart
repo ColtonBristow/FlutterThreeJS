@@ -4,12 +4,13 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:threeJS_Viewer/threeJSModelViewer.dart';
 
 //! TODO: Make all javascript methods return results to improve debug quality in flutter
 
 class ThreeJSController {
-  WebViewController? webController;
+  InAppWebViewController? webController;
   bool? debug;
 
   ThreeJSController({
@@ -17,7 +18,7 @@ class ThreeJSController {
   });
 
   Future<void> setupScene(bool debug) async {
-    return webController?.runJavascript('window.setupScene($debug)');
+    return webController?.evaluateJavascript(source: 'window.setupScene($debug)');
   }
 
   Future<void> loadModels(List<ThreeModel> models, double scale) async {
@@ -26,7 +27,7 @@ class ThreeJSController {
         log("trying to load the following model: ${model.src}");
       }
 
-      await webController?.runJavascript('window.loadModel(\'${model.src}\', ${model.playAnimation}, $scale)');
+      await webController?.evaluateJavascript(source: 'window.loadModel(\'${model.src}\', ${model.playAnimation}, $scale)');
     }
   }
 
@@ -36,7 +37,7 @@ class ThreeJSController {
     }
 
     //TODO: make multiple camera configs and the option to add multiple cameras for transitions
-    await webController?.runJavascript('window.createPerspectiveCamera($camera)');
+    await webController?.evaluateJavascript(source: 'window.createPerspectiveCamera($camera)');
   }
 
   Future<void> createOrbitControls(OrbitControls oc) async {
@@ -44,23 +45,23 @@ class ThreeJSController {
       log('trying to add the following controls ${oc.toString()}');
     }
 
-    await webController?.runJavascript('window.setOrbitControls(${oc.toString()})');
+    await webController?.evaluateJavascript(source: 'window.setOrbitControls(${oc.toString()})');
   }
 
   Future<void> addAmbientLight(String color, int intensity) async {
-    await webController?.runJavascript('window.addAmbientLight(\'$color\', $intensity)');
+    await webController?.evaluateJavascript(source: 'window.addAmbientLight(\'$color\', $intensity)');
   }
 
   Future<void> addDirectionalLight(DirectionalLight light) async {
-    await webController?.runJavascript('window.addDirectionalLight(${light.toString(map: true)})');
+    await webController?.evaluateJavascript(source: 'window.addDirectionalLight(${light.toString(map: true)})');
   }
 
   void resetCameraControls(bool autoRotate, {double? yOffset}) {
-    webController?.runJavascript('window.resetCameraControls($autoRotate, $yOffset)');
+    webController?.evaluateJavascript(source: 'window.resetCameraControls($autoRotate, $yOffset)');
   }
 
   void tweenCamera(double targetX, double targetY, double targetZ, double duration, bool autoRotate, {double? yOffset}) async {
-    await webController?.runJavascript('window.tweenCamera($targetX, $targetY, $targetZ, $duration, $yOffset)');
+    await webController?.evaluateJavascript(source: 'window.tweenCamera($targetX, $targetY, $targetZ, $duration, $yOffset)');
     if (Platform.isIOS) resetCameraControls(autoRotate, yOffset: yOffset);
   }
 }

@@ -28021,18 +28021,18 @@ const setupScene = (_debug) => {
   if (debug) {
     stats = Stats();
     document.body.appendChild(stats.dom);
-    window.Print.postMessage("Scene Created with stats... 10%");
+    console.log("Scene Created with stats... 10%");
   }
   return true;
 };
 const createPerspectiveCamera = (fov2, aspectRatio, near, far) => {
-  window.Print.postMessage("createPerspectiveCamera() called");
+  console.log("createPerspectiveCamera() called");
   camera = new PerspectiveCamera(fov2, aspectRatio != null ? aspectRatio : window.innerWidth / window.innerHeight, near, far);
   window.camera = camera;
   animate();
 };
 const setOrbitControls = (polMin, polMax, azMin, azMax, minDistance, maxDistance, enablePan, autoRotateSpeed, autoRotate, enableZoom, c) => {
-  window.Print.postMessage("setOrbitControls() called");
+  console.log("setOrbitControls() called");
   shouldDemoControls = autoRotate;
   controls = new OrbitControls(c != null ? c : camera, renderer.domElement);
   controls.target.set(0, 0, 0);
@@ -28051,7 +28051,7 @@ const setOrbitControls = (polMin, polMax, azMin, azMax, minDistance, maxDistance
     shouldDemoControls = false;
   });
   controls.addEventListener("end", function() {
-    window.Print.postMessage(`x: ${camera.position.x}, y: ${camera.position.y} , z: ${camera.position.z}`);
+    console.log(`x: ${camera.position.x}, y: ${camera.position.y} , z: ${camera.position.z}`);
   });
   controls.update();
   animate();
@@ -28059,12 +28059,12 @@ const setOrbitControls = (polMin, polMax, azMin, azMax, minDistance, maxDistance
   window.controls = controls;
 };
 const setControlsTarget = (x, y, z) => {
-  window.Print.postMessage("setControlsTarget() called");
+  console.log("setControlsTarget() called");
   controls.target.set(x, y, z);
   controls.update();
 };
 const addGridHelper = () => {
-  window.Print.postMessage("addGridHelper() called");
+  console.log("addGridHelper() called");
   var helper = new GridHelper(100, 100);
   helper.rotation.x = Math.PI / 2;
   helper.material.opacity = 1;
@@ -28074,17 +28074,17 @@ const addGridHelper = () => {
   scene.add(axis);
 };
 const setCameraPosition = (x, y, z) => {
-  window.Print.postMessage("setCameraPosition() called");
+  console.log("setCameraPosition() called");
   camera.position.set(x, y, z);
   controls.update();
 };
 const setCameraRotation = (x, y, z) => {
-  window.Print.postMessage("setCameraRotation() called");
+  console.log("setCameraRotation() called");
   camera.rotation.set(x, y, z);
   controls.update();
 };
 const loadModel = (modelUrl, playAnimation, scale) => {
-  window.Print.postMessage("loadModel() called");
+  console.log("loadModel() called");
   new Promise((res, rej) => {
     loader = new GLTFLoader();
     const dracoLoader = new DRACOLoader();
@@ -28107,21 +28107,20 @@ const loadModel = (modelUrl, playAnimation, scale) => {
       scene.add(gltf.scene);
       res(gltf);
       if (debug) {
-        window.Print.postMessage("loaded the following: " + modelUrl);
+        console.log("loaded the following: " + modelUrl);
       }
     }, (xhr) => {
-      var percentLoaded = xhr.loaded / xhr.total * 100;
-      console.log(percentLoaded + "% loaded");
-      window.ModelLoading.postMessage(xhr.loaded / xhr.total * 100);
+      var percentLoaded2 = xhr.loaded / xhr.total * 100;
+      console.log(percentLoaded2 + "% loaded");
+      window.flutter_inappwebview.callHandler("ModelLoading", percentLoaded2);
     }, (error) => {
-      window.onLoadError("on loading error: " + error);
-      window.Error.postMessage(error);
+      window.flutter_inappwebview.callHandler("Error", percentLoaded);
       rej(error);
     });
   });
 };
 const loadCam = (modelUrl) => {
-  window.Print.postMessage("loadCam() called");
+  console.log("loadCam() called");
   new Promise((res, rej) => {
     loader = new GLTFLoader();
     const dracoLoader = new DRACOLoader();
@@ -28133,19 +28132,17 @@ const loadCam = (modelUrl) => {
       animate();
       res(gltf);
     }, (xhr) => {
-      var percentLoaded = xhr.loaded / xhr.total * 100;
-      window.onObjectLoading(percentLoaded);
+      var percentLoaded2 = xhr.loaded / xhr.total * 100;
       //! send loading to flutter to be parsed
-      window.CameraLoading.postMessage(percentLoaded);
+      window.flutter_inappwebview.callHandler("CameraLoading", percentLoaded2);
     }, (error) => {
-      window.onLoadError(error);
       rej(error);
-      window.Error.postMessage(error);
+      window.flutter_inappwebview.callHandler("Error", percentLoaded);
     });
   });
 };
 const addAmbientLight = (color, intensity) => {
-  window.Print.postMessage("addAmbientLight() called");
+  console.log("addAmbientLight() called");
   const ambient = new AmbientLight(color, intensity);
   scene.add(ambient);
 };
@@ -28167,7 +28164,7 @@ const animate = () => {
   }
 };
 const resetCameraControls = (autoRotate, yOffset) => {
-  window.Print.postMessage("resetCameraControls() called");
+  console.log("resetCameraControls() called");
   controls.dispose();
   controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, yOffset, 0);
@@ -28185,7 +28182,7 @@ const resetCameraControls = (autoRotate, yOffset) => {
   controls.saveState();
 };
 const tweenCamera = (targetX, targetY, targetZ, duration, yOffset) => {
-  window.Print.postMessage("tweenCamera() called");
+  console.log("tweenCamera() called");
   shouldDemoControls = false;
   controls.autoRotate = false;
   var target = controls.target.clone();

@@ -5,12 +5,9 @@ import {
   Scene,
   PerspectiveCamera,
   Clock,
-  DirectionalLight,
   sRGBEncoding,
   GridHelper,
   AxesHelper,
-  Object3D,
-  Vector3,
 } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
@@ -23,7 +20,6 @@ let scene, camera, clock, renderer, mixer, controls, loader, stats, debug;
 let shouldDemoControls = true;
 
 const setupScene = (_debug) => {
-  //window.Print.postMessage("setupScene() called");
   debug = _debug ?? false;
   scene = new Scene();
   clock = new Clock();
@@ -43,14 +39,14 @@ const setupScene = (_debug) => {
     stats = Stats();
     document.body.appendChild(stats.dom);
 
-    window.Print.postMessage('Scene Created with stats... 10%');
+    console.log('Scene Created with stats... 10%');
   }
 
   return true;
 };
 
 const createPerspectiveCamera = (fov, aspectRatio, near, far) => {
-  window.Print.postMessage('createPerspectiveCamera() called');
+  console.log('createPerspectiveCamera() called');
   camera = new PerspectiveCamera(
     fov,
     aspectRatio != null ? aspectRatio : window.innerWidth / window.innerHeight,
@@ -74,7 +70,7 @@ const setOrbitControls = (
   enableZoom,
   c
 ) => {
-  window.Print.postMessage('setOrbitControls() called');
+  console.log('setOrbitControls() called');
   shouldDemoControls = autoRotate;
   controls = new OrbitControls(c ?? camera, renderer.domElement);
   controls.target.set(0, 0, 0);
@@ -97,7 +93,7 @@ const setOrbitControls = (
   });
 
   controls.addEventListener("end", function() {
-    window.Print.postMessage(`x: ${camera.position.x}, y: ${camera.position.y} , z: ${camera.position.z}`);
+    console.log(`x: ${camera.position.x}, y: ${camera.position.y} , z: ${camera.position.z}`);
   });
 
   controls.update();
@@ -107,13 +103,13 @@ const setOrbitControls = (
 };
 
 const setControlsTarget = (x, y, z) => {
-  window.Print.postMessage('setControlsTarget() called');
+  console.log('setControlsTarget() called');
   controls.target.set(x, y, z);
   controls.update();
 };
 
 const addGridHelper = () => {
-  window.Print.postMessage('addGridHelper() called');
+  console.log('addGridHelper() called');
   var helper = new GridHelper(100, 100);
   helper.rotation.x = Math.PI / 2;
   helper.material.opacity = 1;
@@ -125,19 +121,19 @@ const addGridHelper = () => {
 };
 
 const setCameraPosition = (x, y, z) => {
-  window.Print.postMessage('setCameraPosition() called');
+  console.log('setCameraPosition() called');
   camera.position.set(x, y, z);
   controls.update();
 };
 
 const setCameraRotation = (x, y, z) => {
-  window.Print.postMessage('setCameraRotation() called');
+  console.log('setCameraRotation() called');
   camera.rotation.set(x, y, z);
   controls.update();
 };
 
 const loadModel = (modelUrl, playAnimation, scale) => {
-  window.Print.postMessage('loadModel() called');
+  console.log('loadModel() called');
   new Promise((res, rej) => {
     // Instantiate a loader
     loader = new GLTFLoader();
@@ -171,7 +167,7 @@ const loadModel = (modelUrl, playAnimation, scale) => {
 
         res(gltf);
         if (debug) {
-          window.Print.postMessage('loaded the following: ' + modelUrl);
+          console.log('loaded the following: ' + modelUrl);
         }
       },
       // called while loading is progressing
@@ -180,13 +176,15 @@ const loadModel = (modelUrl, playAnimation, scale) => {
 
 
         console.log(percentLoaded + '% loaded');
-        window.ModelLoading.postMessage((xhr.loaded / xhr.total) * 100);
+        //window.ModelLoading.postMessage((xhr.loaded / xhr.total) * 100);
+        window.flutter_inappwebview.callHandler('ModelLoading', percentLoaded);
       },
       // called when loading has errors
       (error) => {
-        window.onLoadError('on loading error: ' + error);
+        //window.onLoadError('on loading error: ' + error);
 
-        window.Error.postMessage(error)
+        //window.Error.postMessage(error)
+        window.flutter_inappwebview.callHandler('Error', percentLoaded);
 
         rej(error);
       }
@@ -195,7 +193,7 @@ const loadModel = (modelUrl, playAnimation, scale) => {
 };
 
 const loadCam = (modelUrl) => {
-  window.Print.postMessage('loadCam() called');
+  console.log('loadCam() called');
   new Promise((res, rej) => {
     // Instantiate a loader
     loader = new GLTFLoader();
@@ -221,31 +219,33 @@ const loadCam = (modelUrl) => {
       // called while loading is progressing
       (xhr) => {
         var percentLoaded = (xhr.loaded / xhr.total) * 100
-        window.onObjectLoading(percentLoaded);
+        //window.onObjectLoading(percentLoaded);
 
         //! send loading to flutter to be parsed
-        window.CameraLoading.postMessage(percentLoaded)
+        //window.CameraLoading.postMessage(percentLoaded)
+        window.flutter_inappwebview.callHandler('CameraLoading', percentLoaded);
 
       },
       // called when loading has errors
       (error) => {
-        window.onLoadError(error);
+        //window.onLoadError(error);
         rej(error);
 
-        window.Error.postMessage(error)
+       //window.Error.postMessage(error)
+        window.flutter_inappwebview.callHandler('Error', percentLoaded);
       }
     );
   });
 };
 
 const addAmbientLight = (color, intensity) => {
-  window.Print.postMessage('addAmbientLight() called');
+  console.log('addAmbientLight() called');
   const ambient = new AmbientLight(color, intensity);
   scene.add(ambient);
 };
 
 const animate = () => {
-  //window.Print.postMessage('animate() called');
+  //console.log('animate() called');
   setTimeout(function () {
     requestAnimationFrame(animate);
   }, 65);
@@ -262,7 +262,7 @@ const animate = () => {
 };
 
 const resetCameraControls = (autoRotate, yOffset) => {
-  window.Print.postMessage("resetCameraControls() called");
+  console.log("resetCameraControls() called");
   controls.dispose();
   controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, yOffset, 0);
@@ -281,7 +281,7 @@ const resetCameraControls = (autoRotate, yOffset) => {
 };
 
 const tweenCamera = (targetX, targetY, targetZ, duration, yOffset) => {
-  window.Print.postMessage("tweenCamera() called");
+  console.log("tweenCamera() called");
   shouldDemoControls = false;
   controls.autoRotate = false;
   var target = controls.target.clone();

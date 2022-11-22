@@ -8,6 +8,9 @@ environment:
 dependencies:
   webview_flutter: ^3.0.4
   local_assets_server: ^2.0.2+12
+
+  flutter_inappwebview: ^5.7.1
+
   flutter:
     sdk: flutter
 

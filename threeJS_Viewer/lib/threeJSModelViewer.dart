@@ -2,6 +2,6 @@
 
 library threejs_model_viewer;
 
-export 'threeJSViewer.dart';
+export 'old_threeJSViewer.dart';
 export './models/main.dart';
-export 'package:webview_flutter/webview_flutter.dart';
+export 'package:flutter_inappwebview/flutter_inappwebview.dart';
