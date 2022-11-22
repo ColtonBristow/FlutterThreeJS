@@ -152,7 +152,7 @@ const loadModel = (modelUrl, playAnimation, scale) => {
     // Load a glTF resource
     loader.load(
       // resource URL
-      'https://warm-mesa-43639.herokuapp.com/' + modelUrl,
+      'https://cors-anywhere-ey3dyle52q-uc.a.run.app/' + modelUrl,
       // called when the resource is loaded
       function (gltf) {
         if (playAnimation) {
@@ -164,7 +164,6 @@ const loadModel = (modelUrl, playAnimation, scale) => {
           if (node.isMesh) {
             node.castShadow = true;
             node.material.depthWrite = !node.material.transparent;
-            node.geometry.center();
           }
         });
         gltf.scene.scale.set(scale, scale, scale);

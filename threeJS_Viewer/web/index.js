@@ -28091,7 +28091,7 @@ const loadModel = (modelUrl, playAnimation, scale) => {
     dracoLoader.setDecoderPath("decoder/");
     dracoLoader.setDecoderConfig({ type: "js" });
     loader.setDRACOLoader(dracoLoader);
-    loader.load("https://warm-mesa-43639.herokuapp.com/" + modelUrl, function(gltf) {
+    loader.load("https://cors-anywhere-ey3dyle52q-uc.a.run.app/" + modelUrl, function(gltf) {
       if (playAnimation) {
         mixer = new AnimationMixer(gltf.scene);
         const action = mixer.clipAction(gltf.animations[0]);
@@ -28101,7 +28101,6 @@ const loadModel = (modelUrl, playAnimation, scale) => {
         if (node.isMesh) {
           node.castShadow = true;
           node.material.depthWrite = !node.material.transparent;
-          node.geometry.center();
         }
       });
       gltf.scene.scale.set(scale, scale, scale);
