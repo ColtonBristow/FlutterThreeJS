@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:threeJS_Viewer/threeJSController.dart';
 import 'package:threeJS_Viewer/threeJSModelViewer.dart';
+import 'package:threeJS_Viewer/threeJSViewer.dart';
 
 void main() {
   runApp(MyApp());
@@ -74,13 +75,6 @@ class _ModelViewState extends State<ModelView> {
                 controller = c;
               },
               debug: kDebugMode,
-              onError: (details) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(details.description),
-                  ),
-                );
-              },
               models: [
                 ThreeModel(
                   src: "https://imgprd21.museumofthebible.org/mobileapi/assets/artifacts/NebBrick13.glb",
