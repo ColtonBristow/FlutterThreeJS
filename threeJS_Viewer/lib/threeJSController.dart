@@ -4,10 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:threeJS_Viewer/threeJSModelViewer.dart';
-
-//! TODO: Make all javascript methods return results to improve debug quality in flutter
 
 class ThreeJSController {
   InAppWebViewController? webController;
@@ -36,7 +33,6 @@ class ThreeJSController {
       log('trying to create a camera with the following properties: ${camera.toString()}');
     }
 
-    //TODO: make multiple camera configs and the option to add multiple cameras for transitions
     await webController?.evaluateJavascript(source: 'window.createPerspectiveCamera($camera)');
   }
 

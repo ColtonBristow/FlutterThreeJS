@@ -177,7 +177,7 @@ const loadModel = (modelUrl, playAnimation, scale) => {
 
         console.log(percentLoaded + '% loaded');
         //window.ModelLoading.postMessage((xhr.loaded / xhr.total) * 100);
-        window.flutter_inappwebview.callHandler('ModelLoading', percentLoaded);
+        window.flutter_inappwebview.callHandler('ModelLoading', percentLoaded) * 1.0;
       },
       // called when loading has errors
       (error) => {
