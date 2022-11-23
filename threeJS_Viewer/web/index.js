@@ -28112,7 +28112,7 @@ const loadModel = (modelUrl, playAnimation, scale) => {
     }, (xhr) => {
       var percentLoaded2 = xhr.loaded / xhr.total * 100;
       console.log(percentLoaded2 + "% loaded");
-      window.flutter_inappwebview.callHandler("ModelLoading", percentLoaded2);
+      window.flutter_inappwebview.callHandler("ModelLoading", percentLoaded2) * 1;
     }, (error) => {
       window.flutter_inappwebview.callHandler("Error", percentLoaded);
       rej(error);

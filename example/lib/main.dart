@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:threeJS_Viewer/threeJSController.dart';
 import 'package:threeJS_Viewer/threeJSModelViewer.dart';
-import 'package:threeJS_Viewer/threeJSViewer.dart';
 
 void main() {
   runApp(MyApp());
@@ -54,6 +53,9 @@ class _ModelViewState extends State<ModelView> {
           children: [
             ThreeJSViewer(
               scale: 4500,
+              onError: ((message, code) {
+                print("Error: $message, Code: $code");
+              }),
               progressBuilder: (double? progress, String message) {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
